@@ -4,8 +4,8 @@ export async function createUser (name, email, hashedPassword, role)
 {
     try {
         const res = await client.query(
-        'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *',
-        [name, email, hashedPassword, role]
+            'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING *',
+            [name, email, hashedPassword, role]
     )
 
         return res.rows[0]
@@ -20,8 +20,8 @@ export async function findUserByEmail (email)
 {
     try {
         const res = await client.query(
-        'SELECT * FROM users WHERE email = $1',
-        [email]
+            'SELECT * FROM users WHERE email = $1',
+            [email]
     )
 
         return res.rows[0]
@@ -29,7 +29,6 @@ export async function findUserByEmail (email)
         console.error('Error searching for user:', err);
         throw err;
     }
-
     
 }
 
@@ -37,8 +36,8 @@ export async function findUserById (user_id)
 {
     try {
         const res = await client.query(
-        'SELECT * FROM users where user_id = $1',
-        [user_id]
+            'SELECT * FROM users where user_id = $1',
+            [user_id]
     )
 
         return res.rows[0]
@@ -62,11 +61,11 @@ export async function updateUser(user_id, updates)
 
 
         const res = await client.query(
-        `UPDATE users
-         SET ${setClause}
-         WHERE user_id = $${values.length}
-         RETURNING *`,
-         [values]
+            `UPDATE users
+            SET ${setClause}
+            WHERE user_id = $${values.length}
+            RETURNING *`,
+            [values]
     )
         return res.rows[0]
     
