@@ -6,8 +6,7 @@ projects, manage tasks, and receive live updates when task changes occur.
 
 The system is built using a modern full-stack architecture with a RESTful
 backend and a reactive frontend. It focuses on clean backend design,
-secure authentication, and real-time collaboration features commonly found
-in enterprise applications.
+secure authentication, and real-time collaboration.
 
 ## Tech Stack
 - Backend: Java Spring Boot (REST API)
