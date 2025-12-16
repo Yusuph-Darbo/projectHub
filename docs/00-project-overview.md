@@ -9,7 +9,7 @@ backend and a reactive frontend. It focuses on clean backend design,
 secure authentication, and real-time collaboration.
 
 ## Tech Stack
-- Backend: Java Spring Boot (REST API)
+- Backend: JS (REST API)
 - Security: Spring Security with JWT authentication
 - Frontend: React
 - Database: PostgreSQL
