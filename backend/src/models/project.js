@@ -61,7 +61,7 @@ export async function updateProject (project_id, updates)
 
         const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(', ')
         const values = Object.values(updates)
-        values.push(project_id) // Add owner_id for WHERE clause
+        values.push(project_id) // Add project_id for WHERE clause
 
 
 
@@ -87,7 +87,7 @@ export async function deleteProject (project_id)
             'DELETE FROM projects WHERE project_id = $1 RETURNING *',
             [project_id]
         )
-        
+
         return res.rows[0]
 
     } catch (err) {

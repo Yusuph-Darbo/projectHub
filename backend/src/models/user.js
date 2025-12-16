@@ -10,13 +10,13 @@ export async function createUser (name, email, hashedPassword, role)
 
         return res.rows[0]
     } catch (err) {
-        console.error('Error creating user:', err);
-        throw err;
+        console.error('Error creating user:', err)
+        throw err
     }
     
 }
 
-export async function findUserByEmail (email)
+export async function getUserByEmail (email)
 {
     try {
         const res = await client.query(
@@ -26,13 +26,13 @@ export async function findUserByEmail (email)
 
         return res.rows[0]
     } catch (err) {
-        console.error('Error searching for user:', err);
-        throw err;
+        console.error('Error searching for user:', err)
+        throw err
     }
-    
+
 }
 
-export async function findUserById (user_id)
+export async function getUserById (user_id)
 {
     try {
         const res = await client.query(
@@ -42,8 +42,8 @@ export async function findUserById (user_id)
 
         return res.rows[0]
     } catch (err) {
-        console.error('Error searching for user:', err);
-        throw err;
+        console.error('Error searching for user:', err)
+        throw err
     }
     
 }
@@ -70,8 +70,8 @@ export async function updateUser(user_id, updates)
         return res.rows[0]
     
     } catch (err) {
-        console.error('Error updating user:', err);
-        throw err;
+        console.error('Error updating user:', err)
+        throw err
     }
     
 }
