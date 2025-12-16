@@ -59,5 +59,19 @@ export async function getMembersOfProject(project_id)
 // Checks if user is a member of a project
 export async function checkMembership(user_id, project_id)
 {
-    
+    try {
+        const res = await client.query(
+            `SELECT 1
+             FROM project_member
+             WHERE user_id = $1 AND project_id = $2`,
+            [user_id, project_id]
+        )
+
+        // If row exists, user is a member
+        return res.rowCount > 0
+
+    } catch (err) {
+        console.error('Error checking membership:', err)
+        throw err
+    }
 }
