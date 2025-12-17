@@ -1,6 +1,6 @@
 import client from '../config/db.js'
 
-export async function createUser (name, email, hashedPassword, role)
+export async function createUser ({name, email, hashedPassword, role})
 {
     try {
         const res = await client.query(

@@ -24,7 +24,7 @@ export async function register(req, res)
         const newUser = await createUser({ 
             name, 
             email, 
-            password: hashedPassword,
+            hashedPassword,
             role: 'USER' 
         })
 
