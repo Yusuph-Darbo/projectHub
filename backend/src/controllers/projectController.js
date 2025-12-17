@@ -1,22 +1,22 @@
 import {
-    createProject,
+    // Conflicting name with function below
+    createProject as createProjectModel,
     getProjectsByUserId,
-    getProjectById
 } from '../models/project.js'
 
 export async function createProject(req, res) 
 {
     try {
         const userId = req.user.id
-        const { name, desc } = req.body
+        const { name, description } = req.body
 
-        const project = await createProject({
+        const project = await createProjectModel({
             name,
-            desc,
+            description,
             owner_id : userId
         })
 
-        res.status(201).json(project)
+        res.status(200).json(project)
 
     } catch (err) {
         res.status(500).json({ error: 'Server error' })

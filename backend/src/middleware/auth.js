@@ -1,3 +1,7 @@
+/* Intercepts the request to the controllers and verifies user using jwt,
+   if the user is verified will pass the request along 
+*/
+
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { getUserById } from '../models/user.js'
@@ -23,6 +27,7 @@ export async function requireAuth(req, res, next) {
             return res.status(401).json({ error: 'User not found' })
         }
 
+        // Attaching user to request
         req.user = {
             id: user.id,
             email: user.email,
