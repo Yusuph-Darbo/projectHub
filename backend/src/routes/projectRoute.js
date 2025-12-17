@@ -1,6 +1,6 @@
 import express from 'express'
 import { requireAuth } from '../middleware/auth.js'
-import { createProject, getMyProjects } from '../controllers/projectController.js'
+import { createProject, getMyProjects, getProjectByIdController } from '../controllers/projectController.js'
 
 const router = express.Router()
 
