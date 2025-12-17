@@ -1,10 +1,6 @@
 import { createUser, getUserByEmail } from '../models/user.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import dotenv from 'dotenv'
-
-// Importing my jwt passkey from .env
-dotenv.config()
 
 export async function register(req, res)
 {
@@ -35,7 +31,7 @@ export async function register(req, res)
             role: newUser.role
         })
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Register error' })
     }
 }
 
@@ -59,11 +55,12 @@ export async function login (req, res)
            Authenticates and authorises users which allows users to create tasks only if they
            are logged in / view projects they are apart of
         */
-        const token = jwt.sign({ id: user.id}, process.env.JWT_SECRET, { expiresIn: '1h'})
 
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email } })
+        const token = jwt.sign({ id: user.user_id}, process.env.JWT_SECRET, { expiresIn: '1h'})
+
+        res.json({ token, user: { id: user.user_id, name: user.name, email: user.email } })
 
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Login error' })
     }
 }

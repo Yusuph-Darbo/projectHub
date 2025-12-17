@@ -2,6 +2,10 @@ import express from "express"
 import authRoutes from './routes/authRoute.js'
 import projectRoutes from './routes/projectRoute.js'
 import taskRoutes from './routes/taskRoute.js'
+import dotenv from 'dotenv'
+
+// Importing my jwt passkey from .env
+dotenv.config()
 
 const app = express()
 

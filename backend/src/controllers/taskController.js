@@ -16,7 +16,7 @@ export async function createTaskController(req, res) {
         res.status(201).json(task)
 
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Create task error' })
     }
     
 }
@@ -35,6 +35,6 @@ export async function getTask(req, res)
         res.status(200).json(task)
 
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Getting task error' })
     }
 }

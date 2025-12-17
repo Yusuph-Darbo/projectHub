@@ -19,7 +19,7 @@ export async function createProject(req, res)
         res.status(200).json(project)
 
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Creating project error' })
     }
 }
 
@@ -32,6 +32,6 @@ export async function getMyProjects (req, res)
         res.status(201).json(project)
 
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Getting project error' })
     }
 }
