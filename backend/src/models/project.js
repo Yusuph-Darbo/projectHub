@@ -1,6 +1,6 @@
 import client from '../config/db.js'
 
-export async function createProject (name, description, owner_id)
+export async function createProject ({ name, description, owner_id })
 {
 
     try {

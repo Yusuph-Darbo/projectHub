@@ -5,6 +5,7 @@ import taskRoutes from './routes/taskRoute.js'
 import dotenv from 'dotenv'
 
 // Importing my jwt passkey from .env
+// Have to run the app from backend folder due to relative pathing bruhh
 dotenv.config()
 
 const app = express()
