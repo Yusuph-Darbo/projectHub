@@ -1,4 +1,3 @@
-import { use } from 'bcrypt/promises.js'
 import {
     createProject,
     getProjectsByUserId,
@@ -31,7 +30,7 @@ export async function getMyProjects (req, res)
         const project = await getProjectsByUserId(userId)
 
         res.status(201).json(project)
-        
+
     } catch (err) {
         res.status(500).json({ error: 'Server error' })
     }
