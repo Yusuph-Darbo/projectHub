@@ -53,6 +53,20 @@ export async function getProjectByOwner (owner_id)
     }
 }
 
+export async function getProjectById(project_id) {
+    try {
+        const res = await client.query(
+            'SELECT * FROM projects WHERE project_id = $1',
+            [project_id]
+        )
+
+        return res.rows[0]
+    } catch (err) {
+        console.error('Error fetching project by id:', err)
+        throw err
+    }
+}
+
 export async function updateProject (project_id, updates)
 {
     try {

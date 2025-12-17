@@ -6,5 +6,6 @@ const router = express.Router()
 
 router.post('/', requireAuth, createProject)
 router.get('/', requireAuth, getMyProjects)
+router.get('/:id', requireAuth, getProjectByIdController)
 
 export default router

@@ -2,6 +2,7 @@ import {
     // Conflicting name with function below
     createProject as createProjectModel,
     getProjectByUser,
+    getProjectById
 } from '../models/project.js'
 
 export async function createProject(req, res) 
@@ -33,5 +34,22 @@ export async function getMyProjects (req, res)
 
     } catch (err) {
         res.status(500).json({ error: 'Getting project error' })
+    }
+}
+
+export async function getProjectByIdController(req, res) {
+    try {
+        const { id } = req.params
+
+        const project = await getProjectById(id)
+
+        if (!project) {
+            return res.status(404).json({ error: 'Project not found' })
+        }
+
+        res.status(200).json(project)
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ error: 'Server error' })
     }
 }
