@@ -1,7 +1,7 @@
 import {
     // Conflicting name with function below
     createProject as createProjectModel,
-    getProjectsByUserId,
+    getProjectByUser,
 } from '../models/project.js'
 
 export async function createProject(req, res) 
@@ -27,7 +27,7 @@ export async function getMyProjects (req, res)
 {
     try {
         const userId = req.user.id
-        const project = await getProjectsByUserId(userId)
+        const project = await getProjectByUser(userId)
 
         res.status(201).json(project)
 
