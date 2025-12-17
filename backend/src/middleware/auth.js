@@ -10,7 +10,7 @@ dotenv.config()
 
 export async function requireAuth(req, res, next) {
     try {
-        const header = req.header.authorization
+        const authHeader = req.header.authorization
 
         if (!authHeader || !authHeader.startsWith('Bearer ')){
             return res.status(401).json({ error: 'No token provided' })
