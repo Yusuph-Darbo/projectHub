@@ -1,12 +1,12 @@
 import client from '../config/db.js'
 
-export async function createTask (project_id, title, description, created_by)
+export async function createTask ({title, description, project_id, created_by})
 {
     try {
         const res = await client.query(
             // Dont need to assign status as tasks are 'To Do' be default in DB
-            'INSERT INTO tasks (project_id, title, description, created_by) VALUES ($1, $2, $3, $4) RETURNING *',
-            [project_id, title, description, created_by]
+            'INSERT INTO tasks (title, description, project_id, created_by) VALUES ($1, $2, $3, $4) RETURNING *',
+            [title, description, project_id, created_by]
         )
         return res.rows[0]
 
