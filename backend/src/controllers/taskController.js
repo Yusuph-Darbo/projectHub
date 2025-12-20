@@ -1,4 +1,4 @@
-import { createTask, getTaskById, updateTask } from "../models/task.js"
+import { createTask, getTaskById, updateTask, updateTaskStatus } from "../models/task.js"
 
 export async function createTaskController(req, res) {
     const { title, description, project_id } = req.body
@@ -60,5 +60,24 @@ export async function updateTaskController(req, res)
         res.json(updateTask)
     } catch (err) {
         res.status(500).json({ error: 'Updating task' })
+    }
+}
+
+export async function updateTaskStatusController(req, res) 
+{
+    try {
+        const {id} = req.params
+        const {status} = req.body
+
+        const updatedTask = await updateTaskStatus(id, {status})
+
+        if (!updatedTask) {
+            return res.status(404).json({ error: "Task not found" })
+        }
+
+        res.json(updateTask)
+
+    } catch (err) {
+        res.status(500).json({ error: 'Updating task status' })
     }
 }
