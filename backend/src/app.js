@@ -2,6 +2,7 @@ import express from "express"
 import authRoutes from './routes/authRoute.js'
 import projectRoutes from './routes/projectRoute.js'
 import taskRoutes from './routes/taskRoute.js'
+import taskAssignmentRoutes from './routes/taskAssignmentRoute.js'
 import dotenv from 'dotenv'
 
 // Importing my jwt passkey from .env
@@ -15,6 +16,7 @@ app.use(express.json())
 app.use('/api/auth', authRoutes)
 app.use('/api/project', projectRoutes)
 app.use('/api/task', taskRoutes)
+app.use('/api/task-assignment', taskAssignmentRoutes)
 
 
 const PORT = process.env.PORT || 3000
