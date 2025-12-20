@@ -70,11 +70,16 @@ export async function getProjectById(project_id) {
 export async function updateProject (project_id, updates)
 {
     try {
-        const keys = Object.keys(updates)
-        if (keys.length === 0) return null // Nothing to update
+        // Getting the update as an objet and filtering out the undefined entries
+        const entries = Object.entries(updates)
+        .filter(([_, value]) => value !== undefined)
 
-        const setClause = keys.map((key, index) => `${key} = $${index + 1}`).join(', ')
-        const values = Object.values(updates)
+        // Checking for no updates
+        if (entries.length === 0) return null
+
+        const setClause = entries.map(([key], index) => `${key} = $${index + 1}`).join(', ')
+
+        const values = entries.map(([_, value]) => value)
         values.push(project_id) // Add project_id for WHERE clause
 
 
@@ -84,8 +89,8 @@ export async function updateProject (project_id, updates)
             SET ${setClause}
             WHERE project_id = $${values.length}
             RETURNING *`,
-            [...values]
-    )
+            values
+        )
         return res.rows[0]
     
     } catch (err) {

@@ -1,17 +1,17 @@
 import {
-    // Conflicting name with function below
-    createProject as createProjectModel,
+    createProject,
     getProjectByUser,
-    getProjectById
+    getProjectById,
+    updateProject
 } from '../models/project.js'
 
-export async function createProject(req, res) 
+export async function createProjectController(req, res) 
 {
     try {
         const userId = req.user.id
         const { name, description } = req.body
 
-        const project = await createProjectModel({
+        const project = await createProject({
             name,
             description,
             owner_id : userId
@@ -20,11 +20,11 @@ export async function createProject(req, res)
         res.status(200).json(project)
 
     } catch (err) {
-        res.status(500).json({ error: 'Creating project error' })
+        res.status(500).json({ error: 'Creating project' })
     }
 }
 
-export async function getMyProjects (req, res)
+export async function getMyProjectsController (req, res)
 {
     try {
         const userId = req.user.id
@@ -33,7 +33,7 @@ export async function getMyProjects (req, res)
         res.status(201).json(project)
 
     } catch (err) {
-        res.status(500).json({ error: 'Getting project error' })
+        res.status(500).json({ error: 'Getting projec' })
     }
 }
 
@@ -49,7 +49,29 @@ export async function getProjectByIdController(req, res) {
 
         res.status(200).json(project)
     } catch (err) {
-        console.error(err)
+        res.status(500).json({ error: 'Getting project by ID' })
+    }
+}
+
+export async function updateProjectController(req, res)
+{
+    try {
+        const { id } = req.params
+        const {name, description} = req.body
+
+        const updatedProject = await updateProject(id, 
+            {
+                name,
+                description
+            })
+
+        if (!updatedProject){
+            return res.status(400).json({ error: 'Project not found' })
+        }
+
+        res.status(200).json(updatedProject)
+
+    } catch (err) {
         res.status(500).json({ error: 'Server error' })
     }
 }

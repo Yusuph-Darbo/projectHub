@@ -57,7 +57,7 @@ export async function updateTaskController(req, res)
             return res.status(404).json({ error: "Task not found" })
         }
 
-        res.json(updateTask)
+        res.status(200).json(updatedTask)
     } catch (err) {
         res.status(500).json({ error: 'Updating task' })
     }
@@ -75,7 +75,7 @@ export async function updateTaskStatusController(req, res)
             return res.status(404).json({ error: "Task not found" })
         }
 
-        res.json(updateTask)
+        res.status(200).json(updatedTask)
 
     } catch (err) {
         res.status(500).json({ error: 'Updating task status' })
