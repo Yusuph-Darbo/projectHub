@@ -2,7 +2,8 @@ import {
     createProject,
     getProjectByUser,
     getProjectById,
-    updateProject
+    updateProject,
+    deleteProject
 } from '../models/project.js'
 
 export async function createProjectController(req, res) 
@@ -72,6 +73,24 @@ export async function updateProjectController(req, res)
         res.status(200).json(updatedProject)
 
     } catch (err) {
-        res.status(500).json({ error: 'Server error' })
+        res.status(500).json({ error: 'Updating project' })
+    }
+}
+
+export async function deleteProjectController(req, res) 
+{
+    try {
+        const { id } = req.params
+
+        const deletedProject = await deleteProject(id)
+
+        if (!deletedProject){
+            return res.status(400).json({ error: 'Project not found' })
+        }
+
+        res.status(200).json(deletedProject)
+
+    } catch (err) {
+        res.status(500).json({ error: 'Deleting project' })
     }
 }
