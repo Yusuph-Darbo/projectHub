@@ -1,5 +1,4 @@
 import './Header.css'
-import '../../styles/global.css'
 
 export default function Header (props) {
     return (
