@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './App.css'
 import Header from './components/Header/Header.jsx'
 
 function App() {
@@ -10,7 +9,7 @@ function App() {
         title="Website Redesign Project"
         subtitle="Track and manage your project tasks"
         showBack
-        // action={<button>+ Add Task</button>}
+        action={<button>+ Add Task</button>}
       />
     </>
   )

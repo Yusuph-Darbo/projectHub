@@ -1,0 +1,83 @@
+header {
+  border-bottom: 1px solid #e5e5e5;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  font-family: "Inter", sans-serif;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.left button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.left button:hover,
+.left button:active {
+  background-color: rgb(232, 232, 232);
+}
+
+.left div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.left h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.2;
+}
+
+header .left p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.2;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+}
+
+.right button {
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-family: "Inter", sans-serif;
+}
+
+.right button:hover {
+  background-color: #0c111c;
+}
