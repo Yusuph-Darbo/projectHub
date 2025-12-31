@@ -9,6 +9,9 @@ import { FaGithub } from "react-icons/fa"
 
 
 export default function Register(){
+    const [mode, setMode] = useState('register')
+    const isLogin = false
+
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
@@ -32,6 +35,7 @@ export default function Register(){
     }
 
     console.log(formData)
+
   }
 
     return (
@@ -41,25 +45,28 @@ export default function Register(){
           <FontAwesomeIcon icon={faLock} />
         </div>
         
-        <h1>Create Account</h1>
-        <p className="subtitle">Enter your details to create your account</p>
+        <h1>{isLogin ? "Welcome back" : "Create Account"}</h1>
+        <p className="subtitle">{isLogin ? "Enter your credentials to access your account" : "Enter your details to create your account"}</p>
 
         <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <label htmlFor="fullName">Name</label>
-            <div className="input-wrapper">
-                <FontAwesomeIcon icon={faUser} className="input-icon" />
-                <input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-                />
-            </div>
-          </div>
+            {!isLogin && (
+                <div className="input-group">
+                    <label htmlFor="fullName">Name</label>
+                    <div className="input-wrapper">
+                        <FontAwesomeIcon icon={faUser} className="input-icon" />
+                        <input
+                        id="fullName"
+                        name="fullName"
+                        type="text"
+                        placeholder="John Doe"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        required
+                        />
+                    </div>
+                </div>
+            )}
+            
 
           <div className="input-group">
             <label htmlFor="email">Email</label>
@@ -92,22 +99,24 @@ export default function Register(){
                 />
             </div>
           </div>
-
-          <div className="input-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <div className="input-wrapper">
-                <FontAwesomeIcon icon={faLock} className="input-icon" />
-                <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                />
-            </div>
-          </div>
+        
+            {!isLogin && (
+                <div className="input-group">
+                    <label htmlFor="confirmPassword">Confirm Password</label>
+                    <div className="input-wrapper">
+                        <FontAwesomeIcon icon={faLock} className="input-icon" />
+                        <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        required
+                        />
+                    </div>
+                </div>
+            )}
 
           <button type="submit" className="sign-up-btn">Sign Up</button>
         </form>
