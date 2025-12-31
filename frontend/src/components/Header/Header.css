@@ -1,18 +1,11 @@
 header {
   border-bottom: 1px solid #e5e5e5;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  box-sizing: border-box;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
   background-color: white;
-  font-family: "Inter", sans-serif;
 }
 
 .left {
@@ -75,7 +68,6 @@ header .left p {
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-  font-family: "Inter", sans-serif;
 }
 
 .right button:hover {

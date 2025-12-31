@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../styles/global.css";
 import "./Register.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope } from "@fortawesome/free-regular-svg-icons";
@@ -131,14 +132,14 @@ export default function Register() {
           )}
 
           <button type="submit" className="sign-up-btn">
-            Sign Up
+            {isLogin ? "Sign In" : "Sign Up"}
           </button>
         </form>
 
         <p className="account-text">
-          Already have an account?
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button onClick={handleClick} className="link">
-            Sign up
+            {isLogin ? "Sign up" : "Sign in"}
           </button>
         </p>
 

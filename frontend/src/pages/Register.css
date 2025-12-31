@@ -1,11 +1,10 @@
 .register-container {
-  min-height: 100vh;
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #ecf3ff;
   padding: 2rem;
-  font-family: "Inter", sans-serif;
 }
 
 .register-card {
@@ -131,16 +130,20 @@ form {
   margin: 1.5rem 0 0 0;
 }
 
-.link {
+.account-text .link {
   color: #3b82f6;
   text-decoration: none;
   font-weight: 500;
   background: none;
   border: none;
-  margin-left: 0px;
+  padding: 0;
+  margin-left: 0.25rem;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
 }
 
-.link:hover {
+.account-text .link:hover {
   text-decoration: underline;
 }
 
