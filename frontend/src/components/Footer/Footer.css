@@ -1,0 +1,41 @@
+footer {
+  border-top: 1px solid #e5e5e5;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: white;
+  font-family: "Inter", sans-serif;
+}
+
+h3 {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+ul {
+  display: flex;
+  list-style-type: none;
+}
+
+li {
+  margin-left: 20px;
+}
+
+a {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 500ms;
+}
+
+a:hover,
+a:active {
+  color: rgb(28, 28, 255);
+}

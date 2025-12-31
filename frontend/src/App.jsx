@@ -1,18 +1,18 @@
 import Header from "./components/Header/Header.jsx";
 import Register from "./pages/Register.jsx";
+import Footer from "./components/Footer/Footer.jsx";
 
-function App() {
+export default function App() {
   return (
     <>
-      {/* <Header 
-        title="Website Redesign Project"
+      <Header
+        title="ProjectHub"
         subtitle="Track and manage your project tasks"
-        showBack
-        action={<button>+ Add Task</button>}
-      /> */}
+        // showBack
+        // action={<button>+ Add Task</button>}
+      />
       <Register />
+      <Footer />
     </>
   );
 }
-
-export default App;
