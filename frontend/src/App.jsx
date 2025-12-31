@@ -1,8 +1,7 @@
-import Header from './components/Header/Header.jsx'
-import Register from './pages/Register.jsx'
+import Header from "./components/Header/Header.jsx";
+import Register from "./pages/Register.jsx";
 
 function App() {
-
   return (
     <>
       {/* <Header 
@@ -13,7 +12,7 @@ function App() {
       /> */}
       <Register />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
