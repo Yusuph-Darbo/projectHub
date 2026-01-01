@@ -1,6 +1,6 @@
 import "./styles/global.css";
 import Header from "./components/Header/Header.jsx";
-import Register from "./pages/Register.jsx";
+import Register from "./pages/Register/Register.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 
 export default function App() {
