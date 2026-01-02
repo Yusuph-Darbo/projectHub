@@ -12,12 +12,8 @@ import NotFound from "./pages/404/404.jsx";
 export default function App() {
   return (
     <>
-      <Header
-        title="ProjectHub"
-        subtitle="Track and manage your project tasks"
-        // showBack
-        action={<button>+ Add Task</button>}
-      />
+      <Header title="ProjectHub" />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />

@@ -1,18 +1,25 @@
+import { useLocation, useNavigate } from "react-router-dom";
+
 import "../../styles/global.css";
 import "./Header.css";
 
-export default function Header(props) {
+export default function Header({ title }) {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+
+  const isDashboard = pathname === "/dashboard";
+
   return (
     <header>
       <div className="left">
-        {props.showBack && <button>←</button>}
+        {isDashboard && <button onClick={() => navigate(-1)}>←</button>}
         <div>
-          <h1>{props.title}</h1>
-          {props.subtitle && <p>{props.subtitle}</p>}
+          <h1>{title}</h1>
+          <p>Track and manage your project tasks</p>
         </div>
       </div>
 
-      <div className="right">{props.action}</div>
+      <div className="right">{isDashboard && <button>+ Add Task</button>}</div>
     </header>
   );
 }
