@@ -19,7 +19,14 @@ export default function Header({ title }) {
         </div>
       </div>
 
-      <div className="right">{isDashboard && <button>+ Add Task</button>}</div>
+      <div className="right">
+        {isDashboard ? (
+          <button className="add-task-btn">+ Add Task</button>
+        ) : (
+          // Mock initial
+          <button className="profile-icon">YD</button>
+        )}
+      </div>
     </header>
   );
 }

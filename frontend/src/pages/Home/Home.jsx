@@ -58,7 +58,7 @@ export default function Home() {
 
       {showCard && (
         <>
-          <div className="modal-overlay" onClick={() => setShowCard(false)}></div>
+          <div className="modal-overlay" onClick={handleClick}></div>
           <Card className="create-project-card">
             <CardHeader>
               <CardTitle>Create New Project</CardTitle>
@@ -67,9 +67,9 @@ export default function Home() {
                 description to get started.
               </CardDescription>
               <CardAction>
-                <button 
-                  className="close-btn" 
-                  onClick={() => setShowCard(false)}
+                <button
+                  className="close-btn"
+                  onClick={handleClick}
                   aria-label="Close modal"
                 >
                   ×
@@ -99,16 +99,10 @@ export default function Home() {
             </CardContent>
 
             <CardFooter>
-              <button 
-                className="btn-cancel" 
-                onClick={() => setShowCard(false)}
-              >
+              <button className="btn-cancel" onClick={handleClick}>
                 Cancel
               </button>
-              <button 
-                className="btn-create" 
-                onClick={() => setShowCard(false)}
-              >
+              <button className="btn-create" onClick={handleClick}>
                 Create Project
               </button>
             </CardFooter>

@@ -58,7 +58,7 @@ header .left p {
   align-items: center;
 }
 
-.right button {
+.add-task-btn {
   background-color: black;
   color: white;
   border: none;
@@ -70,6 +70,12 @@ header .left p {
   transition: background-color 0.2s;
 }
 
-.right button:hover {
+.add-task-btn:hover {
   background-color: #0c111c;
+}
+
+.profile-icon {
+  border-radius: 50%;
+  background-color: #ececf0;
+  padding: 8px;
 }
