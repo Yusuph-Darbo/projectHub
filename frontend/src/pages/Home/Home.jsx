@@ -57,21 +57,63 @@ export default function Home() {
       </div>
 
       {showCard && (
-        <Card className="create-project-card">
-          <CardHeader>
-            <CardTitle>New Project</CardTitle>
-            <CardDescription>Create a new project</CardDescription>
-            <CardAction>X</CardAction>
-          </CardHeader>
+        <>
+          <div className="modal-overlay" onClick={() => setShowCard(false)}></div>
+          <Card className="create-project-card">
+            <CardHeader>
+              <CardTitle>Create New Project</CardTitle>
+              <CardDescription>
+                Add a new project to your dashboard. Give it a name and
+                description to get started.
+              </CardDescription>
+              <CardAction>
+                <button 
+                  className="close-btn" 
+                  onClick={() => setShowCard(false)}
+                  aria-label="Close modal"
+                >
+                  ×
+                </button>
+              </CardAction>
+            </CardHeader>
 
-          <CardContent>
-            <p>Card Content</p>
-          </CardContent>
+            <CardContent>
+              <div className="form-group">
+                <label htmlFor="project-name">Project Name</label>
+                <input
+                  type="text"
+                  id="project-name"
+                  placeholder="Enter project name"
+                  className="form-input"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="project-description">Description</label>
+                <textarea
+                  id="project-description"
+                  placeholder="Enter project description"
+                  className="form-textarea"
+                  rows="4"
+                />
+              </div>
+            </CardContent>
 
-          <CardFooter>
-            <button onClick={() => setShowCard(false)}>Close</button>
-          </CardFooter>
-        </Card>
+            <CardFooter>
+              <button 
+                className="btn-cancel" 
+                onClick={() => setShowCard(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn-create" 
+                onClick={() => setShowCard(false)}
+              >
+                Create Project
+              </button>
+            </CardFooter>
+          </Card>
+        </>
       )}
 
       <div className="projects-grid">
