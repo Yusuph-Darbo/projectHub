@@ -1,6 +1,16 @@
 import "../../styles/global.css";
 import "./Home.css";
 import { FaPlus, FaClock } from "react-icons/fa";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card.jsx";
+import { useState } from "react";
 
 export default function Home() {
   // Mock data
@@ -24,6 +34,12 @@ export default function Home() {
     },
   ];
 
+  const [showCard, setShowCard] = useState(false);
+
+  function handleClick() {
+    setShowCard((prev) => !prev);
+  }
+
   return (
     <main className="home-container">
       <div className="home-header">
@@ -34,11 +50,29 @@ export default function Home() {
             in total
           </p>
         </div>
-        <button className="create-project-btn">
+        <button className="create-project-btn" onClick={handleClick}>
           <FaPlus />
           <span>Create New Project</span>
         </button>
       </div>
+
+      {showCard && (
+        <Card className="create-project-card">
+          <CardHeader>
+            <CardTitle>New Project</CardTitle>
+            <CardDescription>Create a new project</CardDescription>
+            <CardAction>X</CardAction>
+          </CardHeader>
+
+          <CardContent>
+            <p>Card Content</p>
+          </CardContent>
+
+          <CardFooter>
+            <button onClick={() => setShowCard(false)}>Close</button>
+          </CardFooter>
+        </Card>
+      )}
 
       <div className="projects-grid">
         {projects.map((project, index) => (
