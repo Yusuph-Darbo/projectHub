@@ -104,18 +104,24 @@ export default function Kanban() {
   }
 
   return (
-    <main className="home-container">
-      <div className="home-header">
-        <div className="header-left">
-          <h1>My Tasks</h1>
-          <p>
-            {columns.length} {columns.length === 1 ? "task" : "tasks"} in total
-          </p>
+    <>
+      <div className="home-container">
+        <div className="home-header">
+          <div className="header-left">
+            <h1>My Tasks</h1>
+            <p>
+              {columns.reduce((total, col) => total + col.count, 0)}{" "}
+              {columns.reduce((total, col) => total + col.count, 0) === 1
+                ? "task"
+                : "tasks"}{" "}
+              in total
+            </p>
+          </div>
+          <button className="create-project-btn" onClick={handleClick}>
+            <FaPlus />
+            <span>Create New Task</span>
+          </button>
         </div>
-        <button className="create-project-btn" onClick={handleClick}>
-          <FaPlus />
-          <span>Create New Task</span>
-        </button>
       </div>
 
       <div className="kanban-container">
@@ -158,6 +164,69 @@ export default function Kanban() {
           ))}
         </div>
       </div>
-    </main>
+
+      {showCard && (
+        <>
+          <div className="modal-overlay" onClick={handleClick}></div>
+          <Card className="create-task-card">
+            <CardHeader>
+              <CardTitle>Create New Task</CardTitle>
+              <CardDescription>
+                Add a new task to your project. Give it a name and description
+                to get started.
+              </CardDescription>
+              <CardAction>
+                <button
+                  className="close-btn"
+                  onClick={handleClick}
+                  aria-label="Close modal"
+                >
+                  ×
+                </button>
+              </CardAction>
+            </CardHeader>
+
+            <CardContent>
+              <div className="form-group">
+                <label htmlFor="task-name">Task Name</label>
+                <input
+                  type="text"
+                  id="task-name"
+                  placeholder="Enter task name"
+                  className="form-input"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="task-description">Description</label>
+                <textarea
+                  id="task-description"
+                  placeholder="Enter task description"
+                  className="form-textarea"
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="task-status">Status</label>
+                <select>
+                  <option value="toDo">To Do</option>
+                  <option value="inProgress">In Progress</option>
+                  <option value="done">Done</option>
+                </select>
+              </div>
+            </CardContent>
+
+            <CardFooter>
+              <button className="btn-cancel" onClick={handleClick}>
+                Cancel
+              </button>
+              <button className="btn-create" onClick={handleClick}>
+                Create Task
+              </button>
+            </CardFooter>
+          </Card>
+        </>
+      )}
+    </>
   );
 }
