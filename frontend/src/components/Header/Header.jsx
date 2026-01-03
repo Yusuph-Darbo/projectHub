@@ -8,6 +8,7 @@ export default function Header({ title }) {
   const navigate = useNavigate();
 
   const isDashboard = pathname === "/dashboard";
+  const home = pathname === "/";
 
   return (
     <header>
@@ -20,12 +21,10 @@ export default function Header({ title }) {
       </div>
 
       <div className="right">
-        {isDashboard ? (
-          <button className="add-task-btn">+ Add Task</button>
-        ) : (
-          // Mock initial
-          <button className="profile-icon">YD</button>
-        )}
+        {isDashboard && <button className="add-task-btn">+ Add Task</button>}
+
+        {/* // Mock profile */}
+        {home && <button className="profile-icon">YD</button>}
       </div>
     </header>
   );
