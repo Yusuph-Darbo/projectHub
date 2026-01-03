@@ -58,22 +58,6 @@ header .left p {
   align-items: center;
 }
 
-.add-task-btn {
-  background-color: black;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.add-task-btn:hover {
-  background-color: #0c111c;
-}
-
 .profile-icon {
   border-radius: 50%;
   background-color: #ececf0;

@@ -1,7 +1,21 @@
 import "./Kanban.css";
 import { AiOutlineHolder } from "react-icons/ai";
 
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card.jsx";
+import { FaPlus } from "react-icons/fa";
+import { useState } from "react";
+
 export default function Kanban() {
+  const [showCard, setCard] = useState(false);
+
   // Mock data
   const columns = [
     {
@@ -85,46 +99,65 @@ export default function Kanban() {
     },
   ];
 
+  function handleClick() {
+    setCard((prev) => !prev);
+  }
+
   return (
-    <div className="kanban-container">
-      <div className="kanban-board">
-        {columns.map((column) => (
-          <div
-            key={column.id}
-            className="kanban-column"
-            style={{
-              backgroundColor: column.bgColor,
-              border: `2px solid ${column.borderColor}`,
-            }}
-          >
-            <div className="column-header">
-              <h2 className="column-title">{column.title}</h2>
-              <span className="column-count">{column.count}</span>
-            </div>
-            <div className="column-content">
-              {column.tasks.map((task) => (
-                <div key={task.id} className="task-card">
-                  <div className="task-header">
-                    <AiOutlineHolder className="task-icon" />
-                    <h3 className="task-title">{task.title}</h3>
-                  </div>
-                  <p className="task-description">{task.description}</p>
-                  <span
-                    className="task-status"
-                    style={{
-                      backgroundColor: task.statusColor,
-                      color: task.statusTextColor,
-                      border: `1px solid ${column.borderColor}`,
-                    }}
-                  >
-                    {task.status}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+    <main className="home-container">
+      <div className="home-header">
+        <div className="header-left">
+          <h1>My Tasks</h1>
+          <p>
+            {columns.length} {columns.length === 1 ? "task" : "tasks"} in total
+          </p>
+        </div>
+        <button className="create-project-btn" onClick={handleClick}>
+          <FaPlus />
+          <span>Create New Task</span>
+        </button>
       </div>
-    </div>
+
+      <div className="kanban-container">
+        <div className="kanban-board">
+          {columns.map((column) => (
+            <div
+              key={column.id}
+              className="kanban-column"
+              style={{
+                backgroundColor: column.bgColor,
+                border: `2px solid ${column.borderColor}`,
+              }}
+            >
+              <div className="column-header">
+                <h2 className="column-title">{column.title}</h2>
+                <span className="column-count">{column.count}</span>
+              </div>
+              <div className="column-content">
+                {column.tasks.map((task) => (
+                  <div key={task.id} className="task-card">
+                    <div className="task-header">
+                      <AiOutlineHolder className="task-icon" />
+                      <h3 className="task-title">{task.title}</h3>
+                    </div>
+                    <p className="task-description">{task.description}</p>
+                    <span
+                      className="task-status"
+                      style={{
+                        backgroundColor: task.statusColor,
+                        color: task.statusTextColor,
+                        border: `1px solid ${column.borderColor}`,
+                      }}
+                    >
+                      {task.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
   );
 }

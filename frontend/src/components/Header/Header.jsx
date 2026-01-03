@@ -21,10 +21,8 @@ export default function Header({ title }) {
       </div>
 
       <div className="right">
-        {isDashboard && <button className="add-task-btn">+ Add Task</button>}
-
         {/* // Mock profile */}
-        {home && <button className="profile-icon">YD</button>}
+        {home || (isDashboard && <button className="profile-icon">YD</button>)}
       </div>
     </header>
   );
