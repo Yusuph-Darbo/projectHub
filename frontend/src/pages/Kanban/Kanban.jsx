@@ -141,7 +141,11 @@ export default function Kanban() {
               </div>
               <div className="column-content">
                 {column.tasks.map((task) => (
-                  <div key={task.id} className="task-card">
+                  <button
+                    key={task.id}
+                    className="task-card"
+                    onClick={handleClick}
+                  >
                     <div className="task-header">
                       <AiOutlineHolder className="task-icon" />
                       <h3 className="task-title">{task.title}</h3>
@@ -157,7 +161,7 @@ export default function Kanban() {
                     >
                       {task.status}
                     </span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -208,7 +212,7 @@ export default function Kanban() {
 
               <div className="form-group">
                 <label htmlFor="task-status">Status</label>
-                <select>
+                <select className="form-status">
                   <option value="toDo">To Do</option>
                   <option value="inProgress">In Progress</option>
                   <option value="done">Done</option>
