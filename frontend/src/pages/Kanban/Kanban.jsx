@@ -14,7 +14,9 @@ import { FaPlus } from "react-icons/fa";
 import { useState } from "react";
 
 export default function Kanban() {
-  const [showCard, setCard] = useState(false);
+  // Has 3 modes = null || "create" || "edit"
+  const [cardMode, setCardMode] = useState(null);
+  const [activeTask, setActiveTask] = useState(null);
 
   // Mock data
   const columns = [
@@ -99,8 +101,27 @@ export default function Kanban() {
     },
   ];
 
-  function handleClick() {
-    setCard((prev) => !prev);
+  function createCard() {
+    setCardMode("create");
+    setActiveTask(null);
+  }
+
+  function editCard(project) {
+    setCardMode("edit");
+    setActiveTask(project);
+  }
+
+  function closeCard() {
+    setCardMode(null);
+    setActiveTask(null);
+  }
+
+  // Helper function to get status value for select
+  function getStatusValue(status) {
+    if (status === "To Do") return "toDo";
+    if (status === "In Progress") return "inProgress";
+    if (status === "Done") return "done";
+    return "toDo";
   }
 
   return (
@@ -117,7 +138,7 @@ export default function Kanban() {
               in total
             </p>
           </div>
-          <button className="create-project-btn" onClick={handleClick}>
+          <button className="create-project-btn" onClick={createCard}>
             <FaPlus />
             <span>Create New Task</span>
           </button>
@@ -144,7 +165,7 @@ export default function Kanban() {
                   <button
                     key={task.id}
                     className="task-card"
-                    onClick={handleClick}
+                    onClick={() => editCard(task)}
                   >
                     <div className="task-header">
                       <AiOutlineHolder className="task-icon" />
@@ -169,20 +190,34 @@ export default function Kanban() {
         </div>
       </div>
 
-      {showCard && (
+      {cardMode && (
         <>
-          <div className="modal-overlay" onClick={handleClick}></div>
+          <div className="modal-overlay" onClick={closeCard}></div>
           <Card className="create-task-card">
             <CardHeader>
-              <CardTitle>Create New Task</CardTitle>
-              <CardDescription>
-                Add a new task to your project. Give it a name and description
-                to get started.
-              </CardDescription>
+              {cardMode === "create" && (
+                <>
+                  <CardTitle>Create New Task</CardTitle>
+                  <CardDescription>
+                    Add a new task to your project. Give it a name and
+                    description to get started.
+                  </CardDescription>
+                </>
+              )}
+
+              {cardMode === "edit" && activeTask && (
+                <>
+                  <CardTitle>Edit Task</CardTitle>
+                  <CardDescription>
+                    Update the task details below.
+                  </CardDescription>
+                </>
+              )}
+
               <CardAction>
                 <button
                   className="close-btn"
-                  onClick={handleClick}
+                  onClick={closeCard}
                   aria-label="Close modal"
                 >
                   ×
@@ -198,6 +233,7 @@ export default function Kanban() {
                   id="task-name"
                   placeholder="Enter task name"
                   className="form-input"
+                  defaultValue={cardMode === "edit" && activeTask ? activeTask.title : ""}
                 />
               </div>
               <div className="form-group">
@@ -207,12 +243,21 @@ export default function Kanban() {
                   placeholder="Enter task description"
                   className="form-textarea"
                   rows="4"
+                  defaultValue={cardMode === "edit" && activeTask ? activeTask.description : ""}
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="task-status">Status</label>
-                <select className="form-status">
+                <select
+                  id="task-status"
+                  className="form-status"
+                  defaultValue={
+                    cardMode === "edit" && activeTask
+                      ? getStatusValue(activeTask.status)
+                      : "toDo"
+                  }
+                >
                   <option value="toDo">To Do</option>
                   <option value="inProgress">In Progress</option>
                   <option value="done">Done</option>
@@ -221,11 +266,11 @@ export default function Kanban() {
             </CardContent>
 
             <CardFooter>
-              <button className="btn-cancel" onClick={handleClick}>
+              <button className="btn-cancel" onClick={closeCard}>
                 Cancel
               </button>
-              <button className="btn-create" onClick={handleClick}>
-                Create Task
+              <button className="btn-create" onClick={closeCard}>
+                {cardMode === "create" ? "Create Task" : "Update Task"}
               </button>
             </CardFooter>
           </Card>
