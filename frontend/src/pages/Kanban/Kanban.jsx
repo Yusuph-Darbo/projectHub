@@ -233,7 +233,9 @@ export default function Kanban() {
                   id="task-name"
                   placeholder="Enter task name"
                   className="form-input"
-                  defaultValue={cardMode === "edit" && activeTask ? activeTask.title : ""}
+                  defaultValue={
+                    cardMode === "edit" && activeTask ? activeTask.title : ""
+                  }
                 />
               </div>
               <div className="form-group">
@@ -243,7 +245,11 @@ export default function Kanban() {
                   placeholder="Enter task description"
                   className="form-textarea"
                   rows="4"
-                  defaultValue={cardMode === "edit" && activeTask ? activeTask.description : ""}
+                  defaultValue={
+                    cardMode === "edit" && activeTask
+                      ? activeTask.description
+                      : ""
+                  }
                 />
               </div>
 
@@ -266,12 +272,17 @@ export default function Kanban() {
             </CardContent>
 
             <CardFooter>
-              <button className="btn-cancel" onClick={closeCard}>
-                Cancel
+              <button className="btn-delete" onClick={closeCard}>
+                Delete task
               </button>
-              <button className="btn-create" onClick={closeCard}>
-                {cardMode === "create" ? "Create Task" : "Update Task"}
-              </button>
+              <div className="card-footer-rightSide">
+                <button className="btn-cancel" onClick={closeCard}>
+                  Cancel
+                </button>
+                <button className="btn-create" onClick={closeCard}>
+                  {cardMode === "create" ? "Create Task" : "Update Task"}
+                </button>
+              </div>
             </CardFooter>
           </Card>
         </>

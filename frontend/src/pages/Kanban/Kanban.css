@@ -328,13 +328,14 @@
 
 .create-task-card [data-slot="card-footer"] {
   padding: 20px 28px 28px 28px;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 12px;
   border-top: 1px solid #f0f0f0;
 }
 
 .btn-cancel,
-.btn-create {
+.btn-create,
+.btn-delete {
   padding: 11px 24px;
   border-radius: 8px;
   font-size: 14px;
@@ -359,12 +360,22 @@
   background-color: #000000;
   color: #ffffff;
   border-color: #000000;
+  margin-left: 10px;
 }
 
 .btn-create:hover {
   background-color: #1e1e1e;
   border-color: #1e1e1e;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-delete {
+  background-color: #d4183d;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #d13756;
 }
 
 /* Responsive Design */
