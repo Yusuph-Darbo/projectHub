@@ -272,10 +272,13 @@ export default function Kanban() {
             </CardContent>
 
             <CardFooter>
-              <button className="btn-delete" onClick={closeCard}>
-                Delete task
-              </button>
-              <div className="card-footer-rightSide">
+              {cardMode === "edit" && activeTask && (
+                <button className="btn-delete" onClick={closeCard}>
+                  Delete task
+                </button>
+              )}
+
+              <div>
                 <button className="btn-cancel" onClick={closeCard}>
                   Cancel
                 </button>
