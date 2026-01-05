@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../styles/global.css";
 import "./Register.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,8 +7,10 @@ import { faUser, faEnvelope } from "@fortawesome/free-regular-svg-icons";
 import { faLock } from "@fortawesome/free-solid-svg-icons";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
+import { registerUser, loginUser } from "../../utils/api.js";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [mode, setMode] = useState("register");
   const isLogin = mode === "login";
 
@@ -18,34 +21,75 @@ export default function Register() {
     confirmPassword: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   function handleChange(event) {
     setFormData({
       ...formData,
       [event.target.name]: event.target.value,
     });
+    // Clear error when user starts typing
+    if (error) setError("");
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setError("");
+    setLoading(true);
 
-    if (!isLogin && formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+    try {
+      if (!isLogin && formData.password !== formData.confirmPassword) {
+        setError("Passwords do not match");
+        setLoading(false);
+        return;
+      }
 
-    if (isLogin) {
-      console.log("Logging in with", {
-        email: formData.email,
-        password: formData.password,
-      });
-    } else {
-      console.log("Registering user", formData);
+      if (isLogin) {
+        // Login
+        const response = await loginUser({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        // Store token and user data
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+
+        // Redirect to dashboard
+        navigate("/dashboard");
+      } else {
+        // Register
+        const response = await registerUser({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+        });
+
+        // After successful registration, automatically log them in
+        const loginResponse = await loginUser({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        // Store token and user data
+        localStorage.setItem("token", loginResponse.token);
+        localStorage.setItem("user", JSON.stringify(loginResponse.user));
+
+        // Redirect to home
+        navigate("/");
+      }
+    } catch (err) {
+      setError(err.message || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
   function handleClick() {
     setMode((prev) => (prev === "login" ? "register" : "login"));
     setFormData({ fullName: "", email: "", password: "", confirmPassword: "" });
+    setError("");
   }
 
   return (
@@ -61,6 +105,12 @@ export default function Register() {
             ? "Enter your credentials to access your account"
             : "Enter your details to create your account"}
         </p>
+
+        {error && (
+          <div className="error-message" role="alert">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           {!isLogin && (
@@ -131,8 +181,18 @@ export default function Register() {
             </div>
           )}
 
-          <button type="submit" className="sign-up-btn">
-            {isLogin ? "Sign In" : "Sign Up"}
+          <button
+            type="submit"
+            className="sign-up-btn"
+            disabled={loading}
+          >
+            {loading
+              ? isLogin
+                ? "Signing in..."
+                : "Creating account..."
+              : isLogin
+              ? "Sign In"
+              : "Sign Up"}
           </button>
         </form>
 
