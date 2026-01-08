@@ -9,9 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
+import { createProject } from "../../utils/api.js";
 import { useState } from "react";
 
 export default function Home() {
+  // Form states
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   // Mock data
   const projects = [
     {
@@ -37,6 +43,30 @@ export default function Home() {
 
   function handleClick() {
     setShowCard((prev) => !prev);
+  }
+
+  async function handleCreateProject() {
+    if (!projectName.trim() || !projectDescription.trim()) return;
+
+    try {
+      setIsLoading(true);
+
+      const newProject = await createProject({
+        title: projectName,
+        description: projectDescription,
+      });
+
+      // TODO: add project to state instead of mock data
+
+      // Reset & close
+      setProjectName("");
+      setProjectDescription("");
+      setShowCard(false);
+    } catch (err) {
+      console.error("Failed to create project:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -84,6 +114,8 @@ export default function Home() {
                   id="project-name"
                   placeholder="Enter project name"
                   className="form-input"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
                 />
               </div>
               <div className="form-group">
@@ -93,6 +125,8 @@ export default function Home() {
                   placeholder="Enter project description"
                   className="form-textarea"
                   rows="4"
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
                 />
               </div>
             </CardContent>
@@ -101,8 +135,12 @@ export default function Home() {
               <button className="btn-cancel" onClick={handleClick}>
                 Cancel
               </button>
-              <button className="btn-create" onClick={handleClick}>
-                Create Project
+              <button
+                className="btn-create"
+                onClick={handleCreateProject}
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating..." : "Create Project"}
               </button>
             </CardFooter>
           </Card>

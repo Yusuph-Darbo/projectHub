@@ -259,3 +259,8 @@
   background-color: #1e1e1e;
   border-color: #1e1e1e;
 }
+
+.btn-create:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
