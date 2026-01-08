@@ -49,3 +49,10 @@ export async function loginUser(credentials) {
     body: JSON.stringify(credentials),
   });
 }
+
+export async function createProject(projectData) {
+  return apiRequest("/project", {
+    method: "POST",
+    body: JSON.stringify(projectData),
+  });
+}

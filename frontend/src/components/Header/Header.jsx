@@ -21,7 +21,7 @@ export default function Header({ title }) {
 
       <div className="right">
         {/* // Mock profile */}
-        {home || (isDashboard && <button className="profile-icon">YD</button>)}
+        {home && <button className="profile-icon">YD</button>}
       </div>
     </header>
   );
