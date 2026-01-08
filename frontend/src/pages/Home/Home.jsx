@@ -52,7 +52,7 @@ export default function Home() {
       setIsLoading(true);
 
       const newProject = await createProject({
-        title: projectName,
+        name: projectName,
         description: projectDescription,
       });
 
