@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/global.css";
 import "./Register.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEnvelope } from "@fortawesome/free-regular-svg-icons";
@@ -181,11 +180,7 @@ export default function Register() {
             </div>
           )}
 
-          <button
-            type="submit"
-            className="sign-up-btn"
-            disabled={loading}
-          >
+          <button type="submit" className="sign-up-btn" disabled={loading}>
             {loading
               ? isLogin
                 ? "Signing in..."

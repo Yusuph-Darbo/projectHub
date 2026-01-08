@@ -1,4 +1,3 @@
-import "../../styles/global.css";
 import "./404.css";
 
 export default function NotFound() {

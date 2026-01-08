@@ -378,6 +378,11 @@
   background-color: #d13756;
 }
 
+.btn-create:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .kanban-board {

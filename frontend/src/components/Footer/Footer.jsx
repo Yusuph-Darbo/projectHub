@@ -3,7 +3,7 @@ import "./Footer.css";
 export default function Footer() {
   return (
     <footer>
-      <h3>© 2025 Your Company. All rights reserved.</h3>
+      <h3>© Wolf 2025. All rights reserved.</h3>
       <ul>
         <li>
           <a href="#">Privacy Policy</a>

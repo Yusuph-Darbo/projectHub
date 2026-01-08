@@ -1,4 +1,3 @@
-import "../../styles/global.css";
 import "./Home.css";
 import { FaPlus, FaClock } from "react-icons/fa";
 import {

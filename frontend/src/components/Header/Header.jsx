@@ -1,6 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
-import "../../styles/global.css";
 import "./Header.css";
 
 export default function Header({ title }) {

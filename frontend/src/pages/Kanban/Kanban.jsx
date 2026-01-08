@@ -17,6 +17,12 @@ export default function Kanban() {
   // Has 3 modes = null || "create" || "edit"
   const [cardMode, setCardMode] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
+  const [title, setTitle] = useState(
+    cardMode === "edit" && activeTask ? activeTask.title : ""
+  );
+  const [description, setDescription] = useState(
+    cardMode === "edit" && activeTask ? activeTask.description : ""
+  );
 
   // Mock data
   const columns = [
@@ -123,6 +129,9 @@ export default function Kanban() {
     if (status === "Done") return "done";
     return "toDo";
   }
+
+  // When creating a form checking if the user has inputted text
+  const isFormValid = title.trim().length > 0 && description.trim().length > 0;
 
   return (
     <>
@@ -233,9 +242,8 @@ export default function Kanban() {
                   id="task-name"
                   placeholder="Enter task name"
                   className="form-input"
-                  defaultValue={
-                    cardMode === "edit" && activeTask ? activeTask.title : ""
-                  }
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
               <div className="form-group">
@@ -245,11 +253,8 @@ export default function Kanban() {
                   placeholder="Enter task description"
                   className="form-textarea"
                   rows="4"
-                  defaultValue={
-                    cardMode === "edit" && activeTask
-                      ? activeTask.description
-                      : ""
-                  }
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
 
@@ -282,7 +287,11 @@ export default function Kanban() {
                 <button className="btn-cancel" onClick={closeCard}>
                   Cancel
                 </button>
-                <button className="btn-create" onClick={closeCard}>
+                <button
+                  className="btn-create"
+                  onClick={closeCard}
+                  disabled={!isFormValid}
+                >
                   {cardMode === "create" ? "Create Task" : "Update Task"}
                 </button>
               </div>
