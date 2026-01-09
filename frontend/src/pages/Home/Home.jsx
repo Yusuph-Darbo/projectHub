@@ -10,7 +10,9 @@ import {
   CardTitle,
 } from "../../components/ui/card.jsx";
 import { listProjects } from "../../utils/api.js";
+import { formatDistanceToNow } from "date-fns";
 import { createProject } from "../../utils/api.js";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function Home() {
@@ -19,6 +21,8 @@ export default function Home() {
   const [projectDescription, setProjectDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showCard, setShowCard] = useState(false);
+
+  const navigate = useNavigate();
 
   // Projects for user from db
   const [projects, setProjects] = useState([]);
@@ -144,14 +148,24 @@ export default function Home() {
 
       <div className="projects-grid">
         {projects.map((project) => (
-          <div key={project.project_id} className="project-card">
+          <button
+            key={project.project_id}
+            className="project-card"
+            onDoubleClick={() => {
+              navigate("/dashboard");
+            }}
+          >
             <h2 className="project-title">{project.name}</h2>
             <p className="project-description">{project.description}</p>
             <div className="project-timestamp">
               <FaClock />
-              <span>{project.created_at}</span>
+              <span>
+                {formatDistanceToNow(new Date(project.created_at), {
+                  addSuffix: true,
+                })}
+              </span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </main>

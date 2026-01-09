@@ -80,6 +80,9 @@
   transition: box-shadow 0.2s ease;
   transform: scale(1);
   transition: transform 0.3s ease;
+  overflow: hidden;
+  text-align: left;
+  cursor: pointer;
 }
 
 .project-card:hover {
