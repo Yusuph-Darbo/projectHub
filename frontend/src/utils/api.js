@@ -57,4 +57,7 @@ export async function createProject(projectData) {
   });
 }
 
-export async function getMe() {}
+// Don't need to explicitly state method as its GET by default
+export async function getMe() {
+  return apiRequest("/user/me");
+}

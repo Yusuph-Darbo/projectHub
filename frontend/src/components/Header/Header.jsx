@@ -1,10 +1,27 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getMe } from "../../utils/api.js";
 
 import "./Header.css";
 
 export default function Header({ title }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const me = await getMe();
+        setUser(me);
+      } catch (err) {
+        console.error("Not authenticated");
+      }
+    }
+
+    loadUser();
+  });
 
   const isDashboard = pathname === "/dashboard";
   const home = pathname === "/";
@@ -20,8 +37,11 @@ export default function Header({ title }) {
       </div>
 
       <div className="right">
-        {/* // Mock profile */}
-        {home && <button className="profile-icon">YD</button>}
+        {home && (
+          <button className="profile-icon">
+            {user ? user.name[0].toUpperCase() : "?"}
+          </button>
+        )}
       </div>
     </header>
   );
