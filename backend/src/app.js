@@ -26,7 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/task", taskRoutes);
 app.use("/api/task-assignment", taskAssignmentRoutes);
-app.use("/api/user", authRoutes);
+app.use("/api/user", userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

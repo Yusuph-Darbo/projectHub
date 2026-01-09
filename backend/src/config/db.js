@@ -1,15 +1,15 @@
-import pkg from 'pg'
+import pkg from "pg";
 
-const {Client} = pkg
+const { Client } = pkg;
 
 const client = new Client({
-    host: "localhost",
-    user: "postgres",
-    port: 5432,
-    password: "rootUser",
-    database: "yusuphdarbo"
-})
+  host: "localhost",
+  user: "postgres",
+  port: 5432,
+  password: "rootUser",
+  database: "yusuphdarbo",
+});
 
-await client.connect()
+await client.connect();
 
-export default client
+export default client;

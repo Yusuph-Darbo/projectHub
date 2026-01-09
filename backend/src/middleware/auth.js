@@ -2,39 +2,38 @@
    if the user is verified will pass the request along 
 */
 
-import jwt from 'jsonwebtoken'
-import { getUserById } from '../models/user.js'
+import jwt from "jsonwebtoken";
+import { getUserById } from "../models/user.js";
 
 export async function requireAuth(req, res, next) {
-    try {
-        const authHeader = req.headers.authorization
+  try {
+    const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')){
-            return res.status(401).json({ error: 'No token provided' })
-        }
-
-        // Gets the token after the Bearer
-        const token = authHeader.split(' ')[1]
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-
-        const user = await getUserById(decoded.id)
-
-        if (!user){
-            return res.status(401).json({ error: 'User not found' })
-        }
-
-        // Attaching user to request
-        req.user = {
-            id: user.user_id,
-            email: user.email,
-            role: user.role
-        }
-
-        // Go to next middleware / handler
-        next()
-
-    } catch (err) {
-        return res.status(401).json({ error: 'Invalid or expired token' })
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "No token provided" });
     }
+
+    // Gets the token after the Bearer
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await getUserById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    // Attaching user to request
+    req.user = {
+      id: user.user_id,
+      email: user.email,
+      role: user.role,
+    };
+
+    // Go to next middleware / handler
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid or expired token" });
+  }
 }

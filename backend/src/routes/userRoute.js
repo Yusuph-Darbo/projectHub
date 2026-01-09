@@ -4,6 +4,6 @@ import { getUserByIdController } from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.get("/", requireAuth, getUserByIdController);
+router.get("/me", requireAuth, getUserByIdController);
 
 export default router;
