@@ -3,6 +3,7 @@ import authRoutes from "./routes/authRoute.js";
 import projectRoutes from "./routes/projectRoute.js";
 import taskRoutes from "./routes/taskRoute.js";
 import taskAssignmentRoutes from "./routes/taskAssignmentRoute.js";
+import userRoutes from "./routes/userRoute.js";
 import dotenv from "dotenv";
 import cors from "cors";
 
@@ -13,6 +14,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+// Letting frontend access the api
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -24,6 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/task", taskRoutes);
 app.use("/api/task-assignment", taskAssignmentRoutes);
+app.use("/api/user", authRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
