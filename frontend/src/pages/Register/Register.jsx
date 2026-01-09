@@ -55,8 +55,8 @@ export default function Register() {
         localStorage.setItem("token", response.token);
         localStorage.setItem("user", JSON.stringify(response.user));
 
-        // Redirect to dashboard
-        navigate("/dashboard");
+        // Redirect to home
+        navigate("/");
       } else {
         // Register
         const response = await registerUser({
@@ -75,7 +75,6 @@ export default function Register() {
         localStorage.setItem("token", loginResponse.token);
         localStorage.setItem("user", JSON.stringify(loginResponse.user));
 
-        // Redirect to home
         navigate("/");
       }
     } catch (err) {

@@ -10,6 +10,7 @@ export default function Header({ title }) {
 
   const [user, setUser] = useState(null);
 
+  // Used to run logic after header is rendered
   useEffect(() => {
     async function loadUser() {
       try {

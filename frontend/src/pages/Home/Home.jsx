@@ -9,37 +9,32 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
+import { listProjects } from "../../utils/api.js";
 import { createProject } from "../../utils/api.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   // Form states
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  // Mock data
-  const projects = [
-    {
-      title: "Website Redesign",
-      description:
-        "Complete overhaul of the company website with modern design and improved UX",
-      timeAgo: "2 hours ago",
-    },
-    {
-      title: "Mobile App Development",
-      description: "Native mobile application for iOS and Android platforms",
-      timeAgo: "1 day ago",
-    },
-    {
-      title: "Marketing Campaign Q1",
-      description:
-        "Strategic marketing initiatives for the first quarter of 2024",
-      timeAgo: "3 days ago",
-    },
-  ];
-
   const [showCard, setShowCard] = useState(false);
+
+  // Projects for user from db
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const data = await listProjects();
+        setProjects(data);
+      } catch (err) {
+        console.error("Failed to load projects", err.message);
+      }
+    }
+
+    loadProjects();
+  }, []);
 
   function handleClick() {
     setShowCard((prev) => !prev);
@@ -56,14 +51,14 @@ export default function Home() {
         description: projectDescription,
       });
 
-      // TODO: add project to state instead of mock data
+      setProjects((prev) => [newProject, ...prev]);
 
       // Reset & close
       setProjectName("");
       setProjectDescription("");
       setShowCard(false);
     } catch (err) {
-      console.error("Failed to create project:", error.message);
+      console.error("Failed to create project:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -148,13 +143,13 @@ export default function Home() {
       )}
 
       <div className="projects-grid">
-        {projects.map((project, index) => (
-          <div key={index} className="project-card">
-            <h2 className="project-title">{project.title}</h2>
+        {projects.map((project) => (
+          <div key={project.project_id} className="project-card">
+            <h2 className="project-title">{project.name}</h2>
             <p className="project-description">{project.description}</p>
             <div className="project-timestamp">
               <FaClock />
-              <span>{project.timeAgo}</span>
+              <span>{project.created_at}</span>
             </div>
           </div>
         ))}

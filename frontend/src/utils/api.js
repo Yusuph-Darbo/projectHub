@@ -50,6 +50,11 @@ export async function loginUser(credentials) {
   });
 }
 
+// Don't need to explicitly state method as its GET by default
+export async function getMe() {
+  return apiRequest("/user/me");
+}
+
 export async function createProject(projectData) {
   return apiRequest("/project", {
     method: "POST",
@@ -57,7 +62,6 @@ export async function createProject(projectData) {
   });
 }
 
-// Don't need to explicitly state method as its GET by default
-export async function getMe() {
-  return apiRequest("/user/me");
+export async function listProjects() {
+  return apiRequest("/project");
 }
