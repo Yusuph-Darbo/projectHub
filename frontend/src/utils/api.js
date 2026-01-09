@@ -56,3 +56,5 @@ export async function createProject(projectData) {
     body: JSON.stringify(projectData),
   });
 }
+
+export async function getMe() {}
