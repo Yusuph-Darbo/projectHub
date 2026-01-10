@@ -20,7 +20,8 @@ export default function Home() {
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showCard, setShowCard] = useState(false);
+  const [cardMode, setCardMode] = useState(null);
+  const [activeProject, setActiveProject] = useState(null);
 
   const navigate = useNavigate();
 
@@ -40,10 +41,6 @@ export default function Home() {
     loadProjects();
   }, []);
 
-  function handleClick() {
-    setShowCard((prev) => !prev);
-  }
-
   async function handleCreateProject() {
     if (!projectName.trim() || !projectDescription.trim()) return;
 
@@ -60,12 +57,29 @@ export default function Home() {
       // Reset & close
       setProjectName("");
       setProjectDescription("");
-      setShowCard(false);
+      closeCard();
     } catch (err) {
       console.error("Failed to create project:", err.message);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function createCard() {
+    setCardMode("create");
+    setActiveProject(null);
+  }
+
+  function editCard(project) {
+    setCardMode("edit");
+    setActiveProject(project);
+    setProjectName(project.name);
+    setProjectDescription(project.description);
+  }
+
+  function closeCard() {
+    setCardMode(null);
+    setActiveProject(null);
   }
 
   return (
@@ -78,26 +92,39 @@ export default function Home() {
             in total
           </p>
         </div>
-        <button className="create-project-btn" onClick={handleClick}>
+        <button className="create-project-btn" onClick={createCard}>
           <FaPlus />
           <span>Create New Project</span>
         </button>
       </div>
 
-      {showCard && (
+      {cardMode && (
         <>
-          <div className="modal-overlay" onClick={handleClick}></div>
+          <div className="modal-overlay" onClick={closeCard}></div>
           <Card className="create-project-card">
             <CardHeader>
-              <CardTitle>Create New Project</CardTitle>
-              <CardDescription>
-                Add a new project to your dashboard. Give it a name and
-                description to get started.
-              </CardDescription>
+              {cardMode === "create" && (
+                <>
+                  <CardTitle>Create New Project</CardTitle>
+                  <CardDescription>
+                    create a new project. Give it a name and description to get
+                    started.
+                  </CardDescription>
+                </>
+              )}
+
+              {cardMode === "edit" && activeProject && (
+                <>
+                  <CardTitle>Edit Project</CardTitle>
+                  <CardDescription>
+                    Update the project details below.
+                  </CardDescription>
+                </>
+              )}
               <CardAction>
                 <button
                   className="close-btn"
-                  onClick={handleClick}
+                  onClick={closeCard}
                   aria-label="Close modal"
                 >
                   ×
@@ -131,15 +158,23 @@ export default function Home() {
             </CardContent>
 
             <CardFooter>
-              <button className="btn-cancel" onClick={handleClick}>
+              <button className="btn-cancel" onClick={closeCard}>
                 Cancel
               </button>
               <button
                 className="btn-create"
-                onClick={handleCreateProject}
+                onClick={
+                  cardMode === "edit"
+                    ? handleUpdateProject
+                    : handleCreateProject
+                }
                 disabled={isLoading}
               >
-                {isLoading ? "Creating..." : "Create Project"}
+                {isLoading
+                  ? "Saving..."
+                  : cardMode === "edit"
+                  ? "Update Project"
+                  : "Create Project"}
               </button>
             </CardFooter>
           </Card>
@@ -151,6 +186,7 @@ export default function Home() {
           <button
             key={project.project_id}
             className="project-card"
+            onClick={() => editCard(project)}
             onDoubleClick={() => {
               navigate("/dashboard");
             }}
