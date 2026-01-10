@@ -94,6 +94,8 @@ export default function Home() {
   function createCard() {
     setCardMode("create");
     setActiveProject(null);
+    setProjectName("");
+    setProjectDescription("");
   }
 
   function editCard(project) {
@@ -107,6 +109,10 @@ export default function Home() {
     setCardMode(null);
     setActiveProject(null);
   }
+
+  // When creating a form checking if the user has inputted text
+  const isFormValid =
+    projectName.trim().length > 0 && projectDescription.trim().length > 0;
 
   return (
     <main className="home-container">
@@ -189,7 +195,7 @@ export default function Home() {
               </button>
               <button
                 className="btn-create"
-                disabled={isLoading}
+                disabled={!isFormValid}
                 onClick={
                   cardMode === "edit"
                     ? handleUpdateProject
