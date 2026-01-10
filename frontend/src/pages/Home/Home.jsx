@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
-import { editProject, listProjects } from "../../utils/api.js";
+import { deleteProject, editProject, listProjects } from "../../utils/api.js";
 import { formatDistanceToNow } from "date-fns";
 import { createProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
@@ -87,6 +87,25 @@ export default function Home() {
       closeCard();
     } catch (err) {
       console.error("Failed to edit project:", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleDeleteProject() {
+    try {
+      setIsLoading(true);
+
+      await deleteProject(activeProject.project_id);
+
+      // Filtering out the deleted project
+      setProjects((prev) =>
+        prev.filter((p) => p.project_id !== activeProject.project_id)
+      );
+
+      closeCard();
+    } catch (err) {
+      console.error("Failed to delete project:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -191,24 +210,31 @@ export default function Home() {
             </CardContent>
 
             <CardFooter>
-              <button className="btn-cancel" onClick={closeCard}>
-                Cancel
-              </button>
-              <button
-                className="btn-create"
-                disabled={!isFormValid}
-                onClick={
-                  cardMode === "edit"
-                    ? handleUpdateProject
-                    : handleCreateProject
-                }
-              >
-                {isLoading
-                  ? "Saving..."
-                  : cardMode === "edit"
-                  ? "Update Project"
-                  : "Create Project"}
-              </button>
+              {cardMode === "edit" && activeProject && (
+                <button className="btn-delete" onClick={handleDeleteProject}>
+                  Delete task
+                </button>
+              )}
+              <div>
+                <button className="btn-cancel" onClick={closeCard}>
+                  Cancel
+                </button>
+                <button
+                  className="btn-create"
+                  disabled={!isFormValid}
+                  onClick={
+                    cardMode === "edit"
+                      ? handleUpdateProject
+                      : handleCreateProject
+                  }
+                >
+                  {isLoading
+                    ? "Saving..."
+                    : cardMode === "edit"
+                    ? "Update Project"
+                    : "Create Project"}
+                </button>
+              </div>
             </CardFooter>
           </Card>
         </>

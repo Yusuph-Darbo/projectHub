@@ -72,3 +72,9 @@ export async function editProject(projectId, data) {
 export async function listProjects() {
   return apiRequest("/project");
 }
+
+export async function deleteProject(projectId) {
+  return apiRequest(`/project/${projectId}`, {
+    method: "DELETE",
+  });
+}

@@ -239,8 +239,8 @@
 }
 
 .create-project-card [data-slot="card-footer"] {
-  padding: 16px 24px 24px 24px;
-  justify-content: flex-end;
+  padding: 20px 28px 28px 28px;
+  justify-content: space-between;
   gap: 12px;
   border-top: none;
 }
