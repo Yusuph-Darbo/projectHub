@@ -25,6 +25,7 @@ export async function createTaskController(req, res) {
   }
 }
 
+// Gets individual task
 export async function getTask(req, res) {
   try {
     const { id } = req.params;

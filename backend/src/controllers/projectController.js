@@ -4,6 +4,7 @@ import {
   getProjectById,
   updateProject,
   deleteProject,
+  getAllTasksForProject,
 } from "../models/project.js";
 
 export async function createProjectController(req, res) {
@@ -31,6 +32,18 @@ export async function getMyProjectsController(req, res) {
     res.status(201).json(project);
   } catch (err) {
     res.status(500).json({ error: "Getting projec" });
+  }
+}
+
+export async function getAllTasksController(req, res) {
+  try {
+    const { id } = req.params;
+
+    const tasks = await getAllTasksForProject(id);
+
+    res.status(200).json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: "Getting tasks error" });
   }
 }
 

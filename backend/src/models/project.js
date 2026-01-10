@@ -60,6 +60,20 @@ export async function getProjectById(project_id) {
   }
 }
 
+export async function getAllTasksForProject(project_id) {
+  try {
+    const res = await client.query(
+      "SELECT task_id, title, description, status, created_at, updated_at from tasks where project_id = $1",
+      [project_id]
+    );
+
+    return res.rows;
+  } catch (err) {
+    console.error("Error getting tasks for project:", err);
+    throw err;
+  }
+}
+
 export async function updateProject(project_id, updates) {
   try {
     // Getting the update as an objet and filtering out the undefined entries
