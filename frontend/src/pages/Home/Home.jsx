@@ -1,5 +1,6 @@
 import "./Home.css";
 import { FaPlus, FaClock } from "react-icons/fa";
+import { AiOutlineHolder } from "react-icons/ai";
 import {
   Card,
   CardAction,
@@ -218,12 +219,20 @@ export default function Home() {
           <button
             key={project.project_id}
             className="project-card"
-            onClick={() => editCard(project)}
-            // onDoubleClick={() => {
-            //   navigate("/dashboard");
-            // }}
+            onClick={() => {
+              navigate("/dashboard");
+            }}
           >
-            <h2 className="project-title">{project.name}</h2>
+            <div className="project-header">
+              <AiOutlineHolder
+                className="project-icon"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent parent button click
+                  editCard(project);
+                }}
+              />
+              <h2 className="project-title">{project.name}</h2>
+            </div>
             <p className="project-description">{project.description}</p>
             <div className="project-timestamp">
               <FaClock />
