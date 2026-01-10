@@ -62,6 +62,13 @@ export async function createProject(projectData) {
   });
 }
 
+export async function editProject(projectId, data) {
+  return apiRequest(`/project/${projectId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
 export async function listProjects() {
   return apiRequest("/project");
 }

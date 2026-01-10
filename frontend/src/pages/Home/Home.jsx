@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
-import { listProjects } from "../../utils/api.js";
+import { editProject, listProjects } from "../../utils/api.js";
 import { formatDistanceToNow } from "date-fns";
 import { createProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
@@ -60,6 +60,32 @@ export default function Home() {
       closeCard();
     } catch (err) {
       console.error("Failed to create project:", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleUpdateProject() {
+    if (!projectName.trim() || !projectDescription.trim()) return;
+
+    try {
+      setIsLoading(true);
+
+      const updatedProject = await editProject(activeProject.project_id, {
+        name: projectName,
+        description: projectDescription,
+      });
+
+      // Rendering the updated project list
+      setProjects((prev) =>
+        prev.map((p) =>
+          p.project_id === activeProject.project_id ? updatedProject : p
+        )
+      );
+
+      closeCard();
+    } catch (err) {
+      console.error("Failed to edit project:", err.message);
     } finally {
       setIsLoading(false);
     }
@@ -163,12 +189,12 @@ export default function Home() {
               </button>
               <button
                 className="btn-create"
+                disabled={isLoading}
                 onClick={
                   cardMode === "edit"
                     ? handleUpdateProject
                     : handleCreateProject
                 }
-                disabled={isLoading}
               >
                 {isLoading
                   ? "Saving..."
@@ -187,9 +213,9 @@ export default function Home() {
             key={project.project_id}
             className="project-card"
             onClick={() => editCard(project)}
-            onDoubleClick={() => {
-              navigate("/dashboard");
-            }}
+            // onDoubleClick={() => {
+            //   navigate("/dashboard");
+            // }}
           >
             <h2 className="project-title">{project.name}</h2>
             <p className="project-description">{project.description}</p>
