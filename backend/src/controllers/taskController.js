@@ -7,7 +7,8 @@ import {
 } from "../models/task.js";
 
 export async function createTaskController(req, res) {
-  const { title, description, project_id } = req.body;
+  const { title, description } = req.body;
+  const project_id = req.params.id;
   // comes from requireAuth middleware
   const userId = req.user.id;
 

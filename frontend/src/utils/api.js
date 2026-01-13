@@ -78,3 +78,11 @@ export async function deleteProject(projectId) {
     method: "DELETE",
   });
 }
+
+export async function getProjectTasks(projectId) {
+  return apiRequest(`/project/${projectId}/tasks`);
+}
+
+export async function createTask(projectId, data) {
+  return apiRequest("/");
+}

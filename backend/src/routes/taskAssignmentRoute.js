@@ -1,9 +1,9 @@
-import express from "express"
-import { requireAuth } from '../middleware/auth.js'
-import { assignUserToTaskController } from "../controllers/taskAssignmentController.js"
+import express from "express";
+import { requireAuth } from "../middleware/auth.js";
+import { assignUserToTaskController } from "../controllers/taskAssignmentController.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post("/assign/:id", requireAuth, assignUserToTaskController)
+router.post("/assign/:id", requireAuth, assignUserToTaskController);
 
-export default router
+export default router;
