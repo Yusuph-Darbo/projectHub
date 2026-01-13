@@ -1,6 +1,6 @@
 import "./Kanban.css";
 import { AiOutlineHolder } from "react-icons/ai";
-
+import { getProjectTasks, createTask } from "../../utils/api.js";
 import {
   Card,
   CardAction,
@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "../../components/ui/card.jsx";
 import { FaPlus } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Kanban() {
   // Has 3 modes = null || "create" || "edit"
@@ -23,6 +23,16 @@ export default function Kanban() {
   const [description, setDescription] = useState(
     cardMode === "edit" && activeTask ? activeTask.description : ""
   );
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    async function fetchTasks() {
+      const data = await getProjectTasks(10);
+      setTasks(data);
+    }
+
+    fetchTasks();
+  }, []);
 
   // Mock data
   const columns = [

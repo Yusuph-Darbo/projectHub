@@ -83,6 +83,9 @@ export async function getProjectTasks(projectId) {
   return apiRequest(`/project/${projectId}/tasks`);
 }
 
-export async function createTask(projectId, data) {
-  return apiRequest("/");
+export async function createTask(data) {
+  return apiRequest(`/project/${projectId}/tasks`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }
