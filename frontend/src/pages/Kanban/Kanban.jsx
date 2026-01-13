@@ -12,6 +12,7 @@ import {
 } from "../../components/ui/card.jsx";
 import { FaPlus } from "react-icons/fa";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 export default function Kanban() {
   // Has 3 modes = null || "create" || "edit"
@@ -23,99 +24,75 @@ export default function Kanban() {
   const [description, setDescription] = useState(
     cardMode === "edit" && activeTask ? activeTask.description : ""
   );
+  const { projectId } = useParams(); // grabs projectId from URL
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
     async function fetchTasks() {
-      const data = await getProjectTasks(10);
+      if (!projectId) return;
+      const data = await getProjectTasks(Number(projectId));
       setTasks(data);
     }
 
     fetchTasks();
   }, []);
 
-  // Mock data
-  const columns = [
-    {
+  const columnConfig = {
+    "To Do": {
       id: "todo",
       title: "To Do",
-      count: 2,
       bgColor: "#F9FAFC",
       borderColor: "#CAD5E2",
-      tasks: [
-        {
-          id: 1,
-          title: "Write API documentation",
-          description: "Document all REST API endpoints with examples",
-          status: "To Do",
-          statusColor: "#F1F5F9",
-          statusTextColor: "#324158",
-        },
-        {
-          id: 2,
-          title: "Setup CI/CD pipeline",
-          description:
-            "Configure GitHub Actions for automated testing and deployment",
-          status: "To Do",
-          statusColor: "#F1F5F9",
-          statusTextColor: "#324158",
-        },
-      ],
+      statusColor: "#F1F5F9",
+      statusTextColor: "#324158",
     },
-    {
+    "In Progress": {
       id: "in-progress",
       title: "In Progress",
-      count: 2,
       bgColor: "#EEF6FF",
       borderColor: "#8EC5FF",
-      tasks: [
-        {
-          id: 3,
-          title: "Design new landing page",
-          description:
-            "Create wireframes and mockups for the new landing page design",
-          status: "In Progress",
-          statusColor: "#DBEAFF",
-          statusTextColor: "#1447E5",
-        },
-        {
-          id: 4,
-          title: "Implement user authentication",
-          description: "Add login and signup functionality with JWT tokens",
-          status: "In Progress",
-          statusColor: "#DBEAFF",
-          statusTextColor: "#1447E5",
-        },
-      ],
+      statusColor: "#DBEAFF",
+      statusTextColor: "#1447E5",
     },
-    {
+    Done: {
       id: "done",
       title: "Done",
-      count: 2,
       bgColor: "#F0FDF4",
       borderColor: "#7AF1A8",
-      tasks: [
-        {
-          id: 5,
-          title: "Database schema design",
-          description:
-            "Design and implement the database schema for user profiles",
-          status: "Done",
-          statusColor: "#DCFCE6",
-          statusTextColor: "#008236",
-        },
-        {
-          id: 6,
-          title: "Fix responsive layout issues",
-          description:
-            "Resolve mobile view layout problems on various screen sizes",
-          status: "Done",
-          statusColor: "#DCFCE6",
-          statusTextColor: "#008236",
-        },
-      ],
+      statusColor: "#DCFCE6",
+      statusTextColor: "#008236",
     },
-  ];
+  };
+
+  function formatKanbanColumns(tasks) {
+    const columns = Object.values(columnConfig).map((col) => ({
+      ...col,
+      tasks: [],
+      count: 0,
+    }));
+
+    tasks.forEach((task) => {
+      const column = columns.find((col) => col.title === task.status);
+
+      if (column) {
+        column.tasks.push({
+          id: task.task_id,
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          statusColor: column.statusColor,
+          statusTextColor: column.statusTextColor,
+        });
+
+        column.count++;
+      }
+    });
+
+    return columns;
+  }
+
+  // The data formatted
+  const columns = formatKanbanColumns(tasks);
 
   function createCard() {
     setCardMode("create");
