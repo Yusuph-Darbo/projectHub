@@ -1,6 +1,11 @@
 import "./Kanban.css";
 import { AiOutlineHolder } from "react-icons/ai";
-import { getProjectTasks, createTask, deleteTask } from "../../utils/api.js";
+import {
+  getProjectTasks,
+  createTask,
+  deleteTask,
+  editTask,
+} from "../../utils/api.js";
 import {
   Card,
   CardAction,
@@ -131,7 +136,29 @@ export default function Kanban() {
     }
   }
 
-  async function handleUpdateTask() {}
+  async function handleUpdateTask() {
+    if (!title.trim() || !description.trim()) return;
+
+    try {
+      setIsLoading(true);
+
+      const updatedTask = await editTask(activeTask.id, {
+        title,
+        description,
+      });
+
+      // Rendering the updated task list
+      setTasks((prev) =>
+        prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t))
+      );
+
+      closeCard();
+    } catch (err) {
+      console.error("Failed to edit task:", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   // The data formatted
   const columns = formatKanbanColumns(tasks);
