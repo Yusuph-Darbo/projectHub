@@ -50,8 +50,6 @@ export async function updateTaskController(req, res) {
 
     const updatedTask = await updateTask(id, { title, description, status });
 
-    res.status(200).json(updatedTask);
-
     if (!updatedTask) {
       return res.status(404).json({ error: "Task not found" });
     }

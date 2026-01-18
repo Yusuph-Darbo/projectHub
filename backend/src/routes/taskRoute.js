@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.get("/:id", requireAuth, getTask);
 router.put("/:id", requireAuth, updateTaskController);
-router.put("/:id", requireAuth, updateTaskStatusController);
+router.patch("/:id/status", requireAuth, updateTaskStatusController);
 router.delete("/:id", requireAuth, deleteTaskController);
 
 export default router;
