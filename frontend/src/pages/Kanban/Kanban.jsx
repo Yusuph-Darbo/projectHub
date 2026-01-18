@@ -1,6 +1,6 @@
 import "./Kanban.css";
 import { AiOutlineHolder } from "react-icons/ai";
-import { getProjectTasks, createTask } from "../../utils/api.js";
+import { getProjectTasks, createTask, deleteTask } from "../../utils/api.js";
 import {
   Card,
   CardAction,
@@ -18,14 +18,12 @@ export default function Kanban() {
   // Has 3 modes = null || "create" || "edit"
   const [cardMode, setCardMode] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
-  const [title, setTitle] = useState(
-    cardMode === "edit" && activeTask ? activeTask.title : ""
-  );
-  const [description, setDescription] = useState(
-    cardMode === "edit" && activeTask ? activeTask.description : ""
-  );
-  const { projectId } = useParams(); // grabs projectId from URL
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
+
+  const { projectId } = useParams(); // grabs projectId from URL
 
   useEffect(() => {
     async function fetchTasks() {
@@ -99,6 +97,8 @@ export default function Kanban() {
     if (!title.trim() || !description.trim()) return;
 
     try {
+      setIsLoading(true);
+
       const newTask = await createTask(projectId, {
         title,
         description,
@@ -109,8 +109,27 @@ export default function Kanban() {
       closeCard();
     } catch (err) {
       console.error("Failed to create task:", err.message);
+    } finally {
+      setIsLoading(false);
     }
   }
+
+  async function handleDeleteTask() {
+    try {
+      await deleteTask(activeTask.id);
+
+      // Filtering out the deleted task
+      setTasks((prev) => prev.filter((t) => t.id !== activeTask.id));
+
+      closeCard();
+    } catch (err) {
+      console.error("Failed to delete task:", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleUpdateTask() {}
 
   // The data formatted
   const columns = formatKanbanColumns(tasks);
@@ -118,11 +137,15 @@ export default function Kanban() {
   function createCard() {
     setCardMode("create");
     setActiveTask(null);
+    setTitle("");
+    setDescription("");
   }
 
-  function editCard(project) {
+  function editCard(task) {
     setCardMode("edit");
-    setActiveTask(project);
+    setActiveTask(task);
+    setTitle(task.title);
+    setDescription(task.description);
   }
 
   function closeCard() {
@@ -286,7 +309,7 @@ export default function Kanban() {
 
             <CardFooter>
               {cardMode === "edit" && activeTask && (
-                <button className="btn-delete" onClick={closeCard}>
+                <button className="btn-delete" onClick={handleDeleteTask}>
                   Delete task
                 </button>
               )}
@@ -297,10 +320,16 @@ export default function Kanban() {
                 </button>
                 <button
                   className="btn-create"
-                  onClick={handleCreateTask}
                   disabled={!isFormValid}
+                  onClick={
+                    cardMode === "edit" ? handleUpdateTask : handleCreateTask
+                  }
                 >
-                  {cardMode === "create" ? "Create Task" : "Update Task"}
+                  {isLoading
+                    ? "Saving..."
+                    : cardMode === "edit"
+                      ? "Update Task"
+                      : "Create Task"}
                 </button>
               </div>
             </CardFooter>

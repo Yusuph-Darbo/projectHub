@@ -89,3 +89,9 @@ export async function createTask(projectId, data) {
     body: JSON.stringify(data),
   });
 }
+
+export async function deleteTask(taskId) {
+  return apiRequest(`/tasks/${taskId}`, {
+    method: "DELETE",
+  });
+}

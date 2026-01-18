@@ -231,8 +231,8 @@ export default function Home() {
                   {isLoading
                     ? "Saving..."
                     : cardMode === "edit"
-                    ? "Update Project"
-                    : "Create Project"}
+                      ? "Update Project"
+                      : "Create Project"}
                 </button>
               </div>
             </CardFooter>
