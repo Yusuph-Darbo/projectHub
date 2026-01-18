@@ -106,6 +106,6 @@ export async function editTask(taskId, data) {
 export async function editTaskStatus(taskId, status) {
   return apiRequest(`/task/${taskId}/status`, {
     method: "PATCH",
-    body: JSON.stringify(status),
+    body: JSON.stringify({ status }),
   });
 }

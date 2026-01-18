@@ -5,6 +5,7 @@ import {
   createTask,
   deleteTask,
   editTask,
+  editTaskStatus,
 } from "../../utils/api.js";
 import {
   Card,
@@ -25,6 +26,7 @@ export default function Kanban() {
   const [activeTask, setActiveTask] = useState(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [status, setStatus] = useState("To Do");
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
 
@@ -137,15 +139,30 @@ export default function Kanban() {
   }
 
   async function handleUpdateTask() {
+    if (!activeTask) return;
+
+    const detailsChanged =
+      title !== activeTask.title || description !== activeTask.description;
+
+    const statusChanged = status !== activeTask.status;
+
     if (!title.trim() || !description.trim()) return;
 
     try {
       setIsLoading(true);
 
-      const updatedTask = await editTask(activeTask.id, {
-        title,
-        description,
-      });
+      let updatedTask = activeTask;
+
+      if (detailsChanged) {
+        updatedTask = await editTask(activeTask.id, {
+          title,
+          description,
+        });
+      }
+
+      if (statusChanged) {
+        updatedTask = await editTaskStatus(activeTask.id, status);
+      }
 
       // Rendering the updated task list
       setTasks((prev) =>
@@ -175,19 +192,12 @@ export default function Kanban() {
     setActiveTask(task);
     setTitle(task.title);
     setDescription(task.description);
+    setStatus(task.status);
   }
 
   function closeCard() {
     setCardMode(null);
     setActiveTask(null);
-  }
-
-  // Helper function to get status value for select
-  function getStatusValue(status) {
-    if (status === "To Do") return "toDo";
-    if (status === "In Progress") return "inProgress";
-    if (status === "Done") return "done";
-    return "toDo";
   }
 
   // When creating a form checking if the user has inputted text
@@ -323,15 +333,12 @@ export default function Kanban() {
                 <select
                   id="task-status"
                   className="form-status"
-                  defaultValue={
-                    cardMode === "edit" && activeTask
-                      ? getStatusValue(activeTask.status)
-                      : "toDo"
-                  }
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="toDo">To Do</option>
-                  <option value="inProgress">In Progress</option>
-                  <option value="done">Done</option>
+                  <option value="To Do">To Do</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Done">Done</option>
                 </select>
               </div>
             </CardContent>

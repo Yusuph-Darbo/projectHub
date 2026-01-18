@@ -65,7 +65,7 @@ export async function updateTaskStatusController(req, res) {
     const { id } = req.params;
     const { status } = req.body;
 
-    const updatedTask = await updateTaskStatus(id, { status });
+    const updatedTask = await updateTaskStatus(id, status);
 
     if (!updatedTask) {
       return res.status(404).json({ error: "Task not found" });
