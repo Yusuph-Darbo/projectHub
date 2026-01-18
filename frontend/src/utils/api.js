@@ -95,3 +95,10 @@ export async function deleteTask(taskId) {
     method: "DELETE",
   });
 }
+
+export async function editTask(taskId, data) {
+  return apiRequest(`/task/${taskId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
