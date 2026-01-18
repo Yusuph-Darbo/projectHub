@@ -246,7 +246,7 @@ export default function Home() {
             key={project.project_id}
             className="project-card"
             onClick={() => {
-              navigate(`/projects/${project.project_id}/kanban`);
+              navigate(`/dashboard/${project.project_id}`);
             }}
           >
             <div className="project-header">

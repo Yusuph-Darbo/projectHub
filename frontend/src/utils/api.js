@@ -83,7 +83,7 @@ export async function getProjectTasks(projectId) {
   return apiRequest(`/project/${projectId}/tasks`);
 }
 
-export async function createTask(data) {
+export async function createTask(projectId, data) {
   return apiRequest(`/project/${projectId}/tasks`, {
     method: "POST",
     body: JSON.stringify(data),

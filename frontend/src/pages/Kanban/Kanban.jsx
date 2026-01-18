@@ -30,12 +30,16 @@ export default function Kanban() {
   useEffect(() => {
     async function fetchTasks() {
       if (!projectId) return;
-      const data = await getProjectTasks(Number(projectId));
-      setTasks(data);
+      try {
+        const data = await getProjectTasks(Number(projectId));
+        setTasks(data);
+      } catch (err) {
+        console.error("Failed to fetch tasks:", err.message);
+      }
     }
 
     fetchTasks();
-  }, []);
+  }, [projectId]);
 
   const columnConfig = {
     "To Do": {
@@ -89,6 +93,23 @@ export default function Kanban() {
     });
 
     return columns;
+  }
+
+  async function handleCreateTask() {
+    if (!title.trim() || !description.trim()) return;
+
+    try {
+      const newTask = await createTask(projectId, {
+        title,
+        description,
+      });
+
+      setTasks((prev) => [newTask, ...prev]);
+
+      closeCard();
+    } catch (err) {
+      console.error("Failed to create task:", err.message);
+    }
   }
 
   // The data formatted
@@ -276,7 +297,7 @@ export default function Kanban() {
                 </button>
                 <button
                   className="btn-create"
-                  onClick={closeCard}
+                  onClick={handleCreateTask}
                   disabled={!isFormValid}
                 >
                   {cardMode === "create" ? "Create Task" : "Update Task"}

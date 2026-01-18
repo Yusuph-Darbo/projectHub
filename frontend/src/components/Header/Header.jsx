@@ -24,7 +24,7 @@ export default function Header({ title }) {
     loadUser();
   });
 
-  const isDashboard = pathname === "/dashboard";
+  const isDashboard = pathname.startsWith("/dashboard/");
   const home = pathname === "/";
 
   return (

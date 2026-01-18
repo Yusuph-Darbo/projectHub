@@ -17,7 +17,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/projects/:projectId/kanban" element={<Kanban />} />
+        <Route path="/dashboard/:projectId" element={<Kanban />} />
 
         {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />
