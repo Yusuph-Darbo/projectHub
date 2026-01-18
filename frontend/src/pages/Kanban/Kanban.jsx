@@ -116,10 +116,12 @@ export default function Kanban() {
 
   async function handleDeleteTask() {
     try {
+      setIsLoading(true);
+
       await deleteTask(activeTask.id);
 
       // Filtering out the deleted task
-      setTasks((prev) => prev.filter((t) => t.id !== activeTask.id));
+      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.id));
 
       closeCard();
     } catch (err) {

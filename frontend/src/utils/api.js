@@ -91,7 +91,7 @@ export async function createTask(projectId, data) {
 }
 
 export async function deleteTask(taskId) {
-  return apiRequest(`/tasks/${taskId}`, {
+  return apiRequest(`/task/${taskId}`, {
     method: "DELETE",
   });
 }

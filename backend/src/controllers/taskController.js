@@ -85,7 +85,7 @@ export async function deleteTaskController(req, res) {
 
     const deletedTask = await deleteTask(id);
 
-    if (!deleteTask) {
+    if (!deletedTask) {
       return res.status(404).json({ error: "Task not found" });
     }
 
