@@ -61,13 +61,27 @@ header .left p {
 }
 
 .profile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background-color: #ececf0;
-  padding: 8px;
-  transition: background-color 0.3s ease;
+  background: rgb(50, 50, 50);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
   cursor: pointer;
+  letter-spacing: 0.5px;
 }
 
 .profile-icon:hover {
-  background-color: #bebebe;
+  transform: scale(1.05);
+}
+
+.profile-icon:active {
+  transform: scale(0.98);
 }

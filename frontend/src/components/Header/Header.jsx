@@ -1,19 +1,13 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getMe } from "../../utils/api.js";
+import { logOut } from "../../utils/auth.js";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu.jsx";
 
@@ -37,7 +31,16 @@ export default function Header({ title }) {
     }
 
     loadUser();
-  });
+  }, []);
+
+  async function handleLogOut() {
+    try {
+      await logOut();
+      navigate("/register");
+    } catch (err) {
+      console.error("Failed to logout user:", err);
+    }
+  }
 
   const isDashboard = pathname.startsWith("/dashboard/");
   const home = pathname === "/";
@@ -54,9 +57,6 @@ export default function Header({ title }) {
 
       <div className="right">
         {home && (
-          // <button className="profile-icon">
-          //   {user ? user.name[0].toUpperCase() : "?"}
-          // </button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="profile-icon">
@@ -65,7 +65,9 @@ export default function Header({ title }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="start">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem>Log out</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogOut}>
+                Log out
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
