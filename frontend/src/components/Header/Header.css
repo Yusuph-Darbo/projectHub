@@ -12,6 +12,7 @@ header {
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding-left: 29px;
 }
 
 .left button {
@@ -56,10 +57,17 @@ header .left p {
 .right {
   display: flex;
   align-items: center;
+  padding-right: 30px;
 }
 
 .profile-icon {
   border-radius: 50%;
   background-color: #ececf0;
   padding: 8px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.profile-icon:hover {
+  background-color: #bebebe;
 }
