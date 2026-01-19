@@ -2,6 +2,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getMe } from "../../utils/api.js";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu.jsx";
+
 import "./Header.css";
 
 export default function Header({ title }) {
@@ -39,9 +54,20 @@ export default function Header({ title }) {
 
       <div className="right">
         {home && (
-          <button className="profile-icon">
-            {user ? user.name[0].toUpperCase() : "?"}
-          </button>
+          // <button className="profile-icon">
+          //   {user ? user.name[0].toUpperCase() : "?"}
+          // </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="profile-icon">
+                {user ? user.name[0].toUpperCase() : "?"}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="start">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuItem>Log out</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </header>
