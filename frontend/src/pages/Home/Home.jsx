@@ -1,6 +1,7 @@
 import "./Home.css";
 import { FaPlus, FaClock } from "react-icons/fa";
 import { AiOutlineHolder } from "react-icons/ai";
+import { FaFolder } from "react-icons/fa";
 import {
   Card,
   CardAction,
@@ -10,11 +11,19 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../../components/ui/empty.jsx";
 import { deleteProject, editProject, listProjects } from "../../utils/api.js";
 import { formatDistanceToNow } from "date-fns";
 import { createProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { isAuthenticated } from "../../utils/auth.js";
 
 export default function Home() {
   // Form states
@@ -80,8 +89,8 @@ export default function Home() {
       // Rendering the updated project list
       setProjects((prev) =>
         prev.map((p) =>
-          p.project_id === activeProject.project_id ? updatedProject : p
-        )
+          p.project_id === activeProject.project_id ? updatedProject : p,
+        ),
       );
 
       closeCard();
@@ -100,7 +109,7 @@ export default function Home() {
 
       // Filtering out the deleted project
       setProjects((prev) =>
-        prev.filter((p) => p.project_id !== activeProject.project_id)
+        prev.filter((p) => p.project_id !== activeProject.project_id),
       );
 
       closeCard();
@@ -149,6 +158,21 @@ export default function Home() {
           <span>Create New Project</span>
         </button>
       </div>
+
+      {isAuthenticated && (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FaFolder />
+            </EmptyMedia>
+            <EmptyTitle>No Projects Yet</EmptyTitle>
+            <EmptyDescription>
+              You haven't created any projects yet. Get started by creating your
+              first project.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
 
       {cardMode && (
         <>

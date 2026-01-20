@@ -5,6 +5,7 @@ export async function logOut() {
 
 export function isAuthenticated() {
   const token = localStorage.getItem("token");
+  // Converts the token into a boolean
   return !!token;
 }
 

@@ -80,5 +80,3 @@ You can deploy:
 - **Database** to managed Postgres providers
 
 Make sure static assets are built and served correctly with appropriate MIME headers for JS modules.
-
----
