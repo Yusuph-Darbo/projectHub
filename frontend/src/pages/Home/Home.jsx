@@ -101,6 +101,7 @@ export default function Home() {
     }
   }
 
+  // Cannot delete a project if it has tasks, probably have to inclcude cascade in the db
   async function handleDeleteProject() {
     try {
       setIsLoading(true);
@@ -159,7 +160,8 @@ export default function Home() {
         </button>
       </div>
 
-      {isAuthenticated && (
+      {/* user IS logged in AND has NO projects */}
+      {isAuthenticated() && projects.length === 0 && (
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -169,6 +171,22 @@ export default function Home() {
             <EmptyDescription>
               You haven't created any projects yet. Get started by creating your
               first project.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+
+      {/* user is NOT logged in*/}
+      {!isAuthenticated() && (
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FaFolder />
+            </EmptyMedia>
+            <EmptyTitle>You are not logged in</EmptyTitle>
+            <EmptyDescription>
+              Please log in to your account or register an account
+              <a href="/register"> here</a>.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>

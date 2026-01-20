@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getMe } from "../../utils/api.js";
 import { logOut } from "../../utils/auth.js";
+import { isAuthenticated } from "../../utils/auth.js";
 
 import {
   DropdownMenu,
