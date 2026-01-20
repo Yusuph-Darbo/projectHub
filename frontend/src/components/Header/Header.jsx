@@ -66,9 +66,11 @@ export default function Header({ title }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="start">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuItem onClick={handleLogOut}>
-                Log out
-              </DropdownMenuItem>
+              {isAuthenticated() && (
+                <DropdownMenuItem onClick={handleLogOut}>
+                  Log out
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}

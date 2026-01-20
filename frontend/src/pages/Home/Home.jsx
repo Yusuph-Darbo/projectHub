@@ -101,7 +101,7 @@ export default function Home() {
     }
   }
 
-  // Cannot delete a project if it has tasks, probably have to inclcude cascade in the db
+  // Cannot delete a project if it has tasks, probably have to inclcude delete cascade in the db
   async function handleDeleteProject() {
     try {
       setIsLoading(true);
@@ -154,7 +154,11 @@ export default function Home() {
             in total
           </p>
         </div>
-        <button className="create-project-btn" onClick={createCard}>
+        <button
+          className="create-project-btn"
+          onClick={createCard}
+          disabled={!isAuthenticated()}
+        >
           <FaPlus />
           <span>Create New Project</span>
         </button>

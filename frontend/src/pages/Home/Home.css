@@ -44,6 +44,13 @@
   background-color: #1e1e1e;
 }
 
+.create-project-btn:disabled,
+.create-project-btn:disabled:hover {
+  background-color: gray;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .create-project-btn svg {
   font-size: 14px;
 }
