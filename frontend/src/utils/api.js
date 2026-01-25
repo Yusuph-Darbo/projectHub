@@ -109,3 +109,13 @@ export async function editTaskStatus(taskId, status) {
     body: JSON.stringify({ status }),
   });
 }
+
+export async function assignUserToProject(project_id, user_id) {
+  return (
+    apiRequest(`/projects/${project_id}/assign`),
+    {
+      method: "PATCH",
+      body: JSON.stringify(user_id),
+    }
+  );
+}

@@ -20,7 +20,7 @@ import {
 } from "../../components/ui/empty.jsx";
 import { deleteProject, editProject, listProjects } from "../../utils/api.js";
 import { formatDistanceToNow } from "date-fns";
-import { createProject } from "../../utils/api.js";
+import { createProject, assignUserToProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { isAuthenticated } from "../../utils/auth.js";
