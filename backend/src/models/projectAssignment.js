@@ -6,7 +6,7 @@ export async function addUserToProject(user_id, project_id) {
       `INSERT INTO project_member (user_id, project_id)
             VALUES ($1, $2)
             RETURNING *`,
-      [user_id, project_id]
+      [user_id, project_id],
     );
 
     return res.rows[0];
@@ -22,7 +22,7 @@ export async function removeUserFromProject(user_id, project_id) {
       `DELETE FROM project_member
             WHERE user_id = $1 AND project_id = $2
             RETURNING *`,
-      [user_id, project_id]
+      [user_id, project_id],
     );
 
     return res.rows[0];
@@ -40,7 +40,7 @@ export async function getMembersOfProject(project_id) {
             FROM project_member pa
             JOIN users u ON pa.user_id = u.user_id
             WHERE pa.project_id = $1`,
-      [project_id]
+      [project_id],
     );
 
     return res.rows;
@@ -57,7 +57,7 @@ export async function checkMembership(user_id, project_id) {
       `SELECT 1
              FROM project_member
              WHERE user_id = $1 AND project_id = $2`,
-      [user_id, project_id]
+      [user_id, project_id],
     );
 
     // If row exists, user is a member

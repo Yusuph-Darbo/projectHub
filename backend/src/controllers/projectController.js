@@ -31,7 +31,7 @@ export async function getMyProjectsController(req, res) {
 
     res.status(201).json(project);
   } catch (err) {
-    res.status(500).json({ error: "Getting projec" });
+    res.status(500).json({ error: "Getting project" });
   }
 }
 

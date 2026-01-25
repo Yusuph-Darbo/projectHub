@@ -44,7 +44,7 @@ export default function Header({ title }) {
   }
 
   const isDashboard = pathname.startsWith("/dashboard/");
-  const home = pathname === "/";
+  const isRegister = pathname.startsWith("/register");
 
   return (
     <header>
@@ -57,7 +57,7 @@ export default function Header({ title }) {
       </div>
 
       <div className="right">
-        {home && (
+        {!isRegister && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="profile-icon">
