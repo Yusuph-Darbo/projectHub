@@ -121,13 +121,20 @@
 .project-timestamp {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 6px;
   font-size: 12px;
   color: #9b9b9b;
 }
 
+.project-time {
+  display: flex;
+  align-items: center;
+}
+
 .project-timestamp svg {
   font-size: 12px;
+  margin-right: 10px;
 }
 
 .project-icon {

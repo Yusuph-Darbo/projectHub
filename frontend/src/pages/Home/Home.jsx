@@ -307,12 +307,17 @@ export default function Home() {
             </div>
             <p className="project-description">{project.description}</p>
             <div className="project-timestamp">
-              <FaClock />
-              <span>
-                {formatDistanceToNow(new Date(project.created_at), {
-                  addSuffix: true,
-                })}
-              </span>
+              <div className="project-time">
+                <FaClock />
+                <span>
+                  {formatDistanceToNow(new Date(project.created_at), {
+                    addSuffix: true,
+                  })}
+                </span>
+              </div>
+              <div className="project-owner">
+                <p className="">Created by Yusuph</p>
+              </div>
             </div>
           </button>
         ))}

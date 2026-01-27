@@ -4,7 +4,7 @@ export async function createProject({ name, description, owner_id }) {
   try {
     const res = await client.query(
       "INSERT INTO projects (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *",
-      [name, description, owner_id]
+      [name, description, owner_id],
     );
     return res.rows[0];
   } catch (err) {
@@ -23,7 +23,7 @@ export async function getProjectByUser(user_id) {
                 ON p.project_id = pm.project_id
             WHERE p.owner_id = $1 OR pm.user_id = $1
             `,
-      [user_id]
+      [user_id],
     );
     return res.rows;
   } catch (err) {
@@ -36,7 +36,7 @@ export async function getProjectByOwner(owner_id) {
   try {
     const res = await client.query(
       "SELECT * FROM projects WHERE owner_id = $1",
-      [owner_id]
+      [owner_id],
     );
 
     return res.rows;
@@ -50,7 +50,7 @@ export async function getProjectById(project_id) {
   try {
     const res = await client.query(
       "SELECT * FROM projects WHERE project_id = $1",
-      [project_id]
+      [project_id],
     );
 
     return res.rows[0];
@@ -64,7 +64,7 @@ export async function getAllTasksForProject(project_id) {
   try {
     const res = await client.query(
       "SELECT task_id, title, description, status, created_at, updated_at from tasks where project_id = $1",
-      [project_id]
+      [project_id],
     );
 
     return res.rows;
@@ -74,11 +74,31 @@ export async function getAllTasksForProject(project_id) {
   }
 }
 
+export async function getOwnerOfProject(project_id) {
+  try {
+    const res = await client.query(
+      `
+      SELECT u.user_id, u.name
+      FROM users u
+      JOIN projects p
+        ON p.owner_id = u.user_id
+      WHERE p.project_id = $1
+      `,
+      [project_id],
+    );
+
+    return res.rows[0];
+  } catch (err) {
+    console.error("Error getting owner of project:", err);
+    throw err;
+  }
+}
+
 export async function updateProject(project_id, updates) {
   try {
     // Getting the update as an objet and filtering out the undefined entries
     const entries = Object.entries(updates).filter(
-      ([_, value]) => value !== undefined
+      ([_, value]) => value !== undefined,
     );
 
     // Checking for no updates
@@ -96,7 +116,7 @@ export async function updateProject(project_id, updates) {
             SET ${setClause}
             WHERE project_id = $${values.length}
             RETURNING *`,
-      values
+      values,
     );
     return res.rows[0];
   } catch (err) {
@@ -109,7 +129,7 @@ export async function deleteProject(project_id) {
   try {
     const res = await client.query(
       "DELETE FROM projects WHERE project_id = $1 RETURNING *",
-      [project_id]
+      [project_id],
     );
 
     return res.rows[0];
