@@ -17,12 +17,16 @@ export async function getProjectByUser(user_id) {
   try {
     const res = await client.query(
       `
-            SELECT DISTINCT p.*
-            FROM projects p
-            LEFT JOIN project_member pm
-                ON p.project_id = pm.project_id
-            WHERE p.owner_id = $1 OR pm.user_id = $1
-            `,
+      SELECT DISTINCT
+        p.*,
+        u.name AS owner_name
+      FROM projects p
+      JOIN users u
+        ON p.owner_id = u.user_id
+      LEFT JOIN project_member pm
+        ON p.project_id = pm.project_id
+      WHERE p.owner_id = $1 OR pm.user_id = $1
+      `,
       [user_id],
     );
     return res.rows;

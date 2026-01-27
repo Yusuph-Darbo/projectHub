@@ -73,6 +73,10 @@ export async function listProjects() {
   return apiRequest("/project");
 }
 
+export async function getProjectOwner(projectId) {
+  return apiRequest(`/project/${projectId}/owner`);
+}
+
 export async function deleteProject(projectId) {
   return apiRequest(`/project/${projectId}`, {
     method: "DELETE",

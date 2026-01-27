@@ -23,7 +23,7 @@ import { formatDistanceToNow } from "date-fns";
 import { createProject, assignUserToProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { isAuthenticated } from "../../utils/auth.js";
+import { getCurrentUser, isAuthenticated } from "../../utils/auth.js";
 
 export default function Home() {
   // Form states
@@ -37,6 +37,7 @@ export default function Home() {
 
   // Projects for user from db
   const [projects, setProjects] = useState([]);
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
     async function loadProjects() {
@@ -316,7 +317,13 @@ export default function Home() {
                 </span>
               </div>
               <div className="project-owner">
-                <p className="">Created by Yusuph</p>
+                <p>
+                  {currentUser && project.owner_id === currentUser.id
+                    ? "Created by you"
+                    : project.owner_name
+                      ? `Created by ${project.owner_name}`
+                      : "Owner unknown"}
+                </p>
               </div>
             </div>
           </button>
