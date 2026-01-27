@@ -5,6 +5,7 @@ import {
   updateProject,
   deleteProject,
   getAllTasksForProject,
+  getOwnerOfProject,
 } from "../models/project.js";
 
 export async function createProjectController(req, res) {
@@ -96,5 +97,21 @@ export async function deleteProjectController(req, res) {
     res.status(200).json(deletedProject);
   } catch (err) {
     res.status(500).json({ error: "Deleting project" });
+  }
+}
+
+export async function getOwnerOfProjectController(req, res) {
+  try {
+    const { id } = req.params;
+
+    const owner = await getOwnerOfProject(id);
+
+    if (!owner) {
+      return res.status(400).json({ error: "Project not found" });
+    }
+
+    res.status(201).json(owner);
+  } catch (err) {
+    res.status(500).json({ error: "Getting owner of project" });
   }
 }
