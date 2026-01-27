@@ -6,6 +6,7 @@ import {
   deleteTask,
   editTask,
   editTaskStatus,
+  getMembersOfProject,
 } from "../../utils/api.js";
 import {
   Card,
@@ -29,14 +30,16 @@ export default function Kanban() {
   const [status, setStatus] = useState("To Do");
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
+  const [members, setMembers] = useState([]);
 
   const { projectId } = useParams(); // grabs projectId from URL
 
   useEffect(() => {
+    if (!projectId) return;
+
     async function fetchTasks() {
-      if (!projectId) return;
       try {
-        const data = await getProjectTasks(Number(projectId));
+        const data = await getProjectTasks(projectId);
         setTasks(data);
       } catch (err) {
         console.error("Failed to fetch tasks:", err.message);
@@ -44,6 +47,16 @@ export default function Kanban() {
     }
 
     fetchTasks();
+
+    async function fetchMembers() {
+      try {
+        const members = await getMembersOfProject(projectId);
+        setMembers(members);
+      } catch (err) {
+        console.error("Failed to fetch members:", err);
+      }
+    }
+    fetchMembers();
   }, [projectId]);
 
   const columnConfig = {
@@ -278,6 +291,18 @@ export default function Kanban() {
             <FaPlus />
             <span>Add new user</span>
           </button>
+        </div>
+      </div>
+
+      <div className="kanban-container">
+        <div className="members-board">
+          {members.map((member) => (
+            <Card key={member.user_id} className="member-card">
+              <CardContent>
+                <p className="member-username">{member.name}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
 

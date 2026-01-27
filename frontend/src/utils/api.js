@@ -123,3 +123,7 @@ export async function assignUserToProject(project_id, user_id) {
     }
   );
 }
+
+export async function getMembersOfProject(project_id) {
+  return apiRequest(`/projects/${project_id}`);
+}
