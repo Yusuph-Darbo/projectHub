@@ -1,6 +1,7 @@
 import {
   addUserToProject,
   removeUserFromProject,
+  getMembersOfProject,
 } from "../models/projectAssignment.js";
 
 export async function addUserToProjectController(req, res) {
@@ -38,5 +39,17 @@ export async function removeUserFromProjectController(req, res) {
     res.status(200).json(unassignment);
   } catch (err) {
     res.status(500).json({ error: "Unassigning user from project" });
+  }
+}
+
+export async function getAllMembersOfProjectController(req, res) {
+  try {
+    const project_id = req.params.id;
+
+    const users = await getMembersOfProject(project_id);
+
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ error: "Getting users of project" });
   }
 }

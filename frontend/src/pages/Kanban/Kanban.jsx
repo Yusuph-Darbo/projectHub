@@ -166,7 +166,7 @@ export default function Kanban() {
 
       // Rendering the updated task list
       setTasks((prev) =>
-        prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t))
+        prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
       );
 
       closeCard();
@@ -266,6 +266,18 @@ export default function Kanban() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="home-container">
+        <div className="home-header">
+          <div className="home-left">
+            <h2>List of users</h2>
+          </div>
+          <button className="create-project-btn" onClick={createCard}>
+            <FaPlus />
+            <span>Add new user</span>
+          </button>
         </div>
       </div>
 

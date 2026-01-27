@@ -36,7 +36,7 @@ export async function removeUserFromProject(user_id, project_id) {
 export async function getMembersOfProject(project_id) {
   try {
     const res = await client.query(
-      `SELECT u.user_id, u.name, u.email
+      `SELECT u.user_id, u.name
             FROM project_member pa
             JOIN users u ON pa.user_id = u.user_id
             WHERE pa.project_id = $1`,
