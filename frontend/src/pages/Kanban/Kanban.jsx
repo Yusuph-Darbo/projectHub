@@ -285,23 +285,26 @@ export default function Kanban() {
       <div className="home-container">
         <div className="home-header">
           <div className="home-left">
-            <h2>List of users</h2>
+            <h1>Team members</h1>
+            <p>
+              {members.length} {members.length === 1 ? "member" : "members"} on
+              this project
+            </p>
           </div>
-          <button className="create-project-btn" onClick={createCard}>
+          <button className="create-project-btn">
             <FaPlus />
-            <span>Add new user</span>
+            <span>Add member</span>
           </button>
         </div>
       </div>
 
       <div className="kanban-container">
-        <div className="members-board">
+        <div className="members-grid">
           {members.map((member) => (
-            <Card key={member.user_id} className="member-card">
-              <CardContent>
-                <p className="member-username">{member.name}</p>
-              </CardContent>
-            </Card>
+            <div key={member.user_id} className="member-card">
+              <h3 className="member-name">{member.name}</h3>
+              <p className="member-role">Team Member</p>
+            </div>
           ))}
         </div>
       </div>
