@@ -198,9 +198,12 @@ export default function Kanban() {
     try {
       setIsLoading(true);
 
-      const newMember = await assignUserToProject(projectId);
+      // Assign user to project by email
+      await assignUserToProject(projectId, memberEmail);
 
-      setMembers((prev) => [newMember, ...prev]);
+      // Re-fetch full member list so we get name, etc.
+      const updatedMembers = await getMembersOfProject(projectId);
+      setMembers(updatedMembers);
 
       setMemberEmail("");
       closeCard();

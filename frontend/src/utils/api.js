@@ -114,14 +114,11 @@ export async function editTaskStatus(taskId, status) {
   });
 }
 
-export async function assignUserToProject(project_id, user_id) {
-  return (
-    apiRequest(`/projects/${project_id}/assign`),
-    {
-      method: "PATCH",
-      body: JSON.stringify(user_id),
-    }
-  );
+export async function assignUserToProject(project_id, email) {
+  return apiRequest(`/projects/${project_id}/assign`, {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
 
 export async function getMembersOfProject(project_id) {
