@@ -3,19 +3,25 @@ import {
   removeUserFromProject,
   getMembersOfProject,
 } from "../models/projectAssignment.js";
+import { getUserByEmailForAssignment } from "../models/user.js";
 
 export async function addUserToProjectController(req, res) {
   try {
     const project_id = req.params.id;
-    const { user_id } = req.body;
+    const { email } = req.body;
 
-    if (!user_id || !user_id) {
-      return res
-        .status(400)
-        .json({ error: "user_id and task_id are required" });
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
     }
 
-    const assignment = await addUserToProject(user_id, project_id);
+    // Search for user by email
+    const user = await getUserByEmailForAssignment(email);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const assignment = await addUserToProject(user.user_id, project_id);
 
     res.status(201).json(assignment);
   } catch (err) {
@@ -28,10 +34,8 @@ export async function removeUserFromProjectController(req, res) {
     const project_id = req.params.id;
     const { user_id } = req.body;
 
-    if (!user_id || !user_id) {
-      return res
-        .status(400)
-        .json({ error: "user_id and task_id are required" });
+    if (!user_id) {
+      return res.status(400).json({ error: "user_id is required" });
     }
 
     const unassignment = await removeUserFromProject(user_id, project_id);
