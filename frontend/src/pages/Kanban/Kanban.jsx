@@ -7,6 +7,7 @@ import {
   editTask,
   editTaskStatus,
   getMembersOfProject,
+  assignUserToProject,
 } from "../../utils/api.js";
 import {
   Card,
@@ -22,7 +23,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export default function Kanban() {
-  // Has 3 modes = null || "create" || "edit"
+  // Has 3 modes = null || "create" || "edit" || "memberCreate"
   const [cardMode, setCardMode] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
   const [title, setTitle] = useState("");
@@ -31,6 +32,7 @@ export default function Kanban() {
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
+  const [memberEmail, setMemberEmail] = useState("");
 
   const { projectId } = useParams(); // grabs projectId from URL
 
@@ -190,6 +192,25 @@ export default function Kanban() {
     }
   }
 
+  async function handleAddMember() {
+    if (!memberEmail.trim()) return;
+
+    try {
+      setIsLoading(true);
+
+      const newMember = await assignUserToProject(projectId);
+
+      setMembers((prev) => [newMember, ...prev]);
+
+      setMemberEmail("");
+      closeCard();
+    } catch (err) {
+      console.error("Failed to add member to project:", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   // The data formatted
   const columns = formatKanbanColumns(tasks);
 
@@ -213,8 +234,14 @@ export default function Kanban() {
     setActiveTask(null);
   }
 
+  function createMemberCard() {
+    setMemberEmail("");
+    setCardMode("memberCreate");
+  }
+
   // When creating a form checking if the user has inputted text
   const isFormValid = title.trim().length > 0 && description.trim().length > 0;
+  const isMemberFormValid = memberEmail.trim().length > 0;
 
   return (
     <>
@@ -291,7 +318,7 @@ export default function Kanban() {
               this project
             </p>
           </div>
-          <button className="create-project-btn">
+          <button className="create-project-btn" onClick={createMemberCard}>
             <FaPlus />
             <span>Add member</span>
           </button>
@@ -309,7 +336,7 @@ export default function Kanban() {
         </div>
       </div>
 
-      {cardMode && (
+      {(cardMode === "create" || cardMode === "edit") && (
         <>
           <div className="modal-overlay" onClick={closeCard}></div>
           <Card className="create-task-card">
@@ -406,6 +433,60 @@ export default function Kanban() {
                     : cardMode === "edit"
                       ? "Update Task"
                       : "Create Task"}
+                </button>
+              </div>
+            </CardFooter>
+          </Card>
+        </>
+      )}
+
+      {cardMode === "memberCreate" && (
+        <>
+          <div className="modal-overlay" onClick={closeCard}></div>
+          <Card className="create-task-card">
+            <CardHeader>
+              <CardTitle>Add new member</CardTitle>
+              <CardDescription>
+                Add a new member to your project. Enter their email and they
+                will be apart of this project
+              </CardDescription>
+
+              <CardAction>
+                <button
+                  className="close-btn"
+                  onClick={closeCard}
+                  aria-label="Close modal"
+                >
+                  ×
+                </button>
+              </CardAction>
+            </CardHeader>
+
+            <CardContent>
+              <div className="form-group">
+                <label htmlFor="task-name">Member email</label>
+                <input
+                  type="text"
+                  id="member-email"
+                  placeholder="Enter member email"
+                  className="form-input"
+                  value={memberEmail}
+                  onChange={(e) => setMemberEmail(e.target.value)}
+                />
+              </div>
+            </CardContent>
+
+            <CardFooter>
+              <div>
+                <button className="btn-cancel" onClick={closeCard}>
+                  Cancel
+                </button>
+                <button
+                  className="btn-create"
+                  disabled={!isMemberFormValid}
+                  onClick={handleAddMember}
+                >
+                  {isLoading ? "Saving..." : "Add member"}
                 </button>
               </div>
             </CardFooter>
