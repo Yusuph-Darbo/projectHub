@@ -7,6 +7,7 @@ import {
   getAllTasksForProject,
   getOwnerOfProject,
 } from "../models/project.js";
+import { addUserToProject } from "../models/projectAssignment.js";
 
 export async function createProjectController(req, res) {
   try {
@@ -18,6 +19,9 @@ export async function createProjectController(req, res) {
       description,
       owner_id: userId,
     });
+
+    // Automatically add the creator as a member of the project
+    await addUserToProject(userId, project.project_id);
 
     res.status(200).json(project);
   } catch (err) {

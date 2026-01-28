@@ -1,5 +1,6 @@
 import "./Kanban.css";
 import { AiOutlineHolder } from "react-icons/ai";
+import { RiDeleteBin2Line } from "react-icons/ri";
 import {
   getProjectTasks,
   createTask,
@@ -8,6 +9,7 @@ import {
   editTaskStatus,
   getMembersOfProject,
   assignUserToProject,
+  getProjectOwner,
 } from "../../utils/api.js";
 import {
   Card,
@@ -21,6 +23,7 @@ import {
 import { FaPlus } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { getCurrentUser } from "../../utils/auth.js";
 
 export default function Kanban() {
   // Has 3 modes = null || "create" || "edit" || "memberCreate"
@@ -33,8 +36,10 @@ export default function Kanban() {
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
   const [memberEmail, setMemberEmail] = useState("");
+  const [projectOwner, setProjectOwner] = useState(null);
 
   const { projectId } = useParams(); // grabs projectId from URL
+  const currentUser = getCurrentUser();
 
   useEffect(() => {
     if (!projectId) return;
@@ -59,6 +64,16 @@ export default function Kanban() {
       }
     }
     fetchMembers();
+
+    async function fetchOwner() {
+      try {
+        const owner = await getProjectOwner(projectId); // { user_id, name }
+        setProjectOwner(owner);
+      } catch (err) {
+        console.error("Failed to fetch project owner:", err);
+      }
+    }
+    fetchOwner();
   }, [projectId]);
 
   const columnConfig = {
@@ -245,6 +260,12 @@ export default function Kanban() {
   // When creating a form checking if the user has inputted text
   const isFormValid = title.trim().length > 0 && description.trim().length > 0;
   const isMemberFormValid = memberEmail.trim().length > 0;
+  const displayMembers = projectOwner
+    ? [
+        projectOwner,
+        ...members.filter((m) => m.user_id !== projectOwner.user_id),
+      ]
+    : members;
 
   return (
     <>
@@ -330,12 +351,27 @@ export default function Kanban() {
 
       <div className="kanban-container">
         <div className="members-grid">
-          {members.map((member) => (
+          {displayMembers.map((member) => {
+            const isOwner = projectOwner && member.user_id === projectOwner.user_id;
+            const isYou = currentUser && member.user_id === currentUser.id;
+
+            return (
             <div key={member.user_id} className="member-card">
-              <h3 className="member-name">{member.name}</h3>
-              <p className="member-role">Team Member</p>
+              <div className="member-header">
+                <h3 className="member-name">
+                  {member.name}
+                  {isYou ? " (You)" : ""}
+                </h3>
+                <RiDeleteBin2Line
+                  className="bin-icon"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent parent button click
+                  }}
+                />
+              </div>
+              <p className="member-role">{isOwner ? "Owner" : "Team Member"}</p>
             </div>
-          ))}
+          )})}
         </div>
       </div>
 

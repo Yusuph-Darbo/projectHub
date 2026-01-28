@@ -201,13 +201,17 @@ p {
   border: 1.5px solid #e8e8e8;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.25s ease;
-  cursor: pointer;
 }
 
 .member-card:hover {
   border-color: #d0d0d0;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   transform: translateY(-3px);
+}
+
+.member-header {
+  display: flex;
+  justify-content: space-between;
 }
 
 .member-name {
@@ -228,6 +232,10 @@ p {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.bin-icon {
+  cursor: pointer;
 }
 
 /* Modal Styles */
