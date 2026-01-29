@@ -21,6 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
+import { toast } from "sonner";
 import { FaPlus } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -227,6 +228,8 @@ export default function Kanban() {
 
       setMemberEmail("");
       closeCard();
+
+      toast.success("Member added successfully.");
     } catch (err) {
       console.error("Failed to add member to project:", err.message);
     } finally {
@@ -361,10 +364,12 @@ export default function Kanban() {
               this project
             </p>
           </div>
-          <button className="create-project-btn" onClick={createMemberCard}>
-            <FaPlus />
-            <span>Add member</span>
-          </button>
+          {isOwner && (
+            <button className="create-project-btn" onClick={createMemberCard}>
+              <FaPlus />
+              <span>Add member</span>
+            </button>
+          )}
         </div>
       </div>
 

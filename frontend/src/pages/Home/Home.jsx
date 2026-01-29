@@ -20,7 +20,7 @@ import {
 } from "../../components/ui/empty.jsx";
 import { deleteProject, editProject, listProjects } from "../../utils/api.js";
 import { formatDistanceToNow } from "date-fns";
-import { createProject, assignUserToProject } from "../../utils/api.js";
+import { createProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCurrentUser, isAuthenticated } from "../../utils/auth.js";
@@ -259,7 +259,7 @@ export default function Home() {
             <CardFooter>
               {cardMode === "edit" && activeProject && (
                 <button className="btn-delete" onClick={handleDeleteProject}>
-                  Delete task
+                  Delete project
                 </button>
               )}
               <div>
@@ -297,13 +297,16 @@ export default function Home() {
             }}
           >
             <div className="project-header">
-              <AiOutlineHolder
-                className="project-icon"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent parent button click
-                  editCard(project);
-                }}
-              />
+              {currentUser && project.owner_id === currentUser.id && (
+                <AiOutlineHolder
+                  className="project-icon"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent parent button click
+                    editCard(project);
+                  }}
+                />
+              )}
+
               <h2 className="project-title">{project.name}</h2>
             </div>
             <p className="project-description">{project.description}</p>

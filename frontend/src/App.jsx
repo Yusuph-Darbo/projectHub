@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "./components/ui/sonner.jsx";
 
 import "./styles/global.css";
 
@@ -24,6 +25,7 @@ export default function App() {
       </Routes>
 
       <Footer />
+      <Toaster richColors position="top-center" />
     </>
   );
 }
