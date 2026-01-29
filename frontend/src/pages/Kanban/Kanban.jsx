@@ -10,6 +10,7 @@ import {
   getMembersOfProject,
   assignUserToProject,
   getProjectOwner,
+  removeUserFromProject,
 } from "../../utils/api.js";
 import {
   Card,
@@ -40,6 +41,10 @@ export default function Kanban() {
 
   const { projectId } = useParams(); // grabs projectId from URL
   const currentUser = getCurrentUser();
+
+  // Check if current user is the owner
+  const isOwner =
+    currentUser && projectOwner && currentUser.id === projectOwner.user_id;
 
   useEffect(() => {
     if (!projectId) return;
@@ -229,6 +234,20 @@ export default function Kanban() {
     }
   }
 
+  async function handleRemoveMember(user_id) {
+    try {
+      setIsLoading(true);
+
+      await removeUserFromProject(projectId, user_id);
+
+      setMembers((prev) => prev.filter((m) => m.user_id !== user_id));
+    } catch (err) {
+      console.error("Failed to remove member from project:", err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   // The data formatted
   const columns = formatKanbanColumns(tasks);
 
@@ -352,26 +371,33 @@ export default function Kanban() {
       <div className="kanban-container">
         <div className="members-grid">
           {displayMembers.map((member) => {
-            const isOwner = projectOwner && member.user_id === projectOwner.user_id;
+            const isMemberOwner =
+              projectOwner && member.user_id === projectOwner.user_id;
             const isYou = currentUser && member.user_id === currentUser.id;
 
             return (
-            <div key={member.user_id} className="member-card">
-              <div className="member-header">
-                <h3 className="member-name">
-                  {member.name}
-                  {isYou ? " (You)" : ""}
-                </h3>
-                <RiDeleteBin2Line
-                  className="bin-icon"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent parent button click
-                  }}
-                />
+              <div key={member.user_id} className="member-card">
+                <div className="member-header">
+                  <h3 className="member-name">
+                    {member.name}
+                    {isYou ? " (You)" : ""}
+                  </h3>
+                  {isOwner && !isMemberOwner && (
+                    <RiDeleteBin2Line
+                      className="bin-icon"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent parent button click
+                        handleRemoveMember(member.user_id);
+                      }}
+                    />
+                  )}
+                </div>
+                <p className="member-role">
+                  {isMemberOwner ? "Owner" : "Team Member"}
+                </p>
               </div>
-              <p className="member-role">{isOwner ? "Owner" : "Team Member"}</p>
-            </div>
-          )})}
+            );
+          })}
         </div>
       </div>
 

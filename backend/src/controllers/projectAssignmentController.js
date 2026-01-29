@@ -4,6 +4,7 @@ import {
   getMembersOfProject,
 } from "../models/projectAssignment.js";
 import { getUserByEmailForAssignment } from "../models/user.js";
+import { getProjectById } from "../models/project.js";
 
 export async function addUserToProjectController(req, res) {
   try {
@@ -36,6 +37,20 @@ export async function removeUserFromProjectController(req, res) {
 
     if (!user_id) {
       return res.status(400).json({ error: "user_id is required" });
+    }
+
+    // Check if the requesting user is the project owner
+    const project = await getProjectById(project_id);
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    // req.user.id comes from requireAuth middleware
+    if (project.owner_id !== req.user.id) {
+      return res
+        .status(403)
+        .json({ error: "Only the project owner can remove members" });
     }
 
     const unassignment = await removeUserFromProject(user_id, project_id);

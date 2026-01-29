@@ -124,3 +124,10 @@ export async function assignUserToProject(project_id, email) {
 export async function getMembersOfProject(project_id) {
   return apiRequest(`/projects/${project_id}`);
 }
+
+export async function removeUserFromProject(project_id, user_id) {
+  return apiRequest(`/projects/${project_id}/unassign`, {
+    method: "DELETE",
+    body: JSON.stringify({ user_id }),
+  });
+}
