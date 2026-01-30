@@ -150,8 +150,11 @@ export default function Kanban() {
       setTasks((prev) => [newTask, ...prev]);
 
       closeCard();
+
+      toast.success("Created task successfully.");
     } catch (err) {
       console.error("Failed to create task:", err.message);
+      toast.error("Failed to create task");
     } finally {
       setIsLoading(false);
     }
@@ -167,8 +170,11 @@ export default function Kanban() {
       setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.id));
 
       closeCard();
+
+      toast.success("Successfully deleted task");
     } catch (err) {
       console.error("Failed to delete task:", err.message);
+      toast.error("Failed to delete task. Try again");
     } finally {
       setIsLoading(false);
     }
@@ -206,8 +212,11 @@ export default function Kanban() {
       );
 
       closeCard();
+
+      toast.success("Successfully updated task");
     } catch (err) {
       console.error("Failed to edit task:", err.message);
+      toast.error("Failed to edit task");
     } finally {
       setIsLoading(false);
     }
@@ -232,6 +241,7 @@ export default function Kanban() {
       toast.success("Member added successfully.");
     } catch (err) {
       console.error("Failed to add member to project:", err.message);
+      toast.error("Cannot find user.");
     } finally {
       setIsLoading(false);
     }
@@ -244,8 +254,11 @@ export default function Kanban() {
       await removeUserFromProject(projectId, user_id);
 
       setMembers((prev) => prev.filter((m) => m.user_id !== user_id));
+
+      toast.success("Member removed successfully.");
     } catch (err) {
       console.error("Failed to remove member from project:", err.message);
+      toast.error("Failed to remove user from project");
     } finally {
       setIsLoading(false);
     }

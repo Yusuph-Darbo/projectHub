@@ -18,6 +18,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "../../components/ui/empty.jsx";
+import { toast } from "sonner";
 import { deleteProject, editProject, listProjects } from "../../utils/api.js";
 import { formatDistanceToNow } from "date-fns";
 import { createProject } from "../../utils/api.js";
@@ -69,8 +70,11 @@ export default function Home() {
       setProjectName("");
       setProjectDescription("");
       closeCard();
+
+      toast.success("Created project successfully");
     } catch (err) {
       console.error("Failed to create project:", err.message);
+      toast.error("Failed to create project");
     } finally {
       setIsLoading(false);
     }
@@ -95,8 +99,11 @@ export default function Home() {
       );
 
       closeCard();
+
+      toast.success("Updated project successfully");
     } catch (err) {
       console.error("Failed to edit project:", err.message);
+      toast.error("Failed to update project");
     } finally {
       setIsLoading(false);
     }
@@ -115,8 +122,11 @@ export default function Home() {
       );
 
       closeCard();
+
+      toast.success("Deleted project successfully");
     } catch (err) {
       console.error("Failed to delete project:", err.message);
+      toast.error("Failed to delete project");
     } finally {
       setIsLoading(false);
     }
