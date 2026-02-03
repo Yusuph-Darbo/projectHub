@@ -56,7 +56,6 @@ export default function Kanban() {
       try {
         const data = await getProjectTasks(projectId);
         setTasks(data);
-        console.log(data);
       } catch (err) {
         console.error("Failed to fetch tasks:", err.message);
       }
@@ -68,7 +67,6 @@ export default function Kanban() {
       try {
         const members = await getMembersOfProject(projectId);
         setMembers(members);
-        console.log(members);
       } catch (err) {
         console.error("Failed to fetch members:", err);
       }
@@ -90,7 +88,7 @@ export default function Kanban() {
   const userMap = useMemo(() => {
     const map = {};
 
-    // Creating a dictionary between user_id and names
+    // Creating a dictionary / object between user_id and names
     members.forEach((m) => {
       map[m.user_id] = m.name;
     });
@@ -146,6 +144,7 @@ export default function Kanban() {
           description: task.description,
           status: task.status,
           createdBy: userMap[task.created_by] ?? "Unknown user",
+          assignedTo: task.assigned_to ?? "Unassigned",
           statusColor: column.statusColor,
           statusTextColor: column.statusTextColor,
         });
@@ -370,20 +369,31 @@ export default function Kanban() {
                       <AiOutlineHolder className="task-icon" />
                       <h3 className="task-title">{task.title}</h3>
                     </div>
-                    <p className="task-description">{task.description}</p>
-                    <div className="task-footer">
-                      <span
-                        className="task-status"
-                        style={{
-                          backgroundColor: task.statusColor,
-                          color: task.statusTextColor,
-                          border: `1px solid ${column.borderColor}`,
-                        }}
-                      >
-                        {task.status}
-                      </span>
 
-                      <p>Created by: {task.createdBy}</p>
+                    <p className="task-description">{task.description}</p>
+
+                    <div className="task-footer">
+                      <div className="task-status-row">
+                        <span
+                          className="task-status"
+                          style={{
+                            backgroundColor: task.statusColor,
+                            color: task.statusTextColor,
+                            border: `1px solid ${column.borderColor}`,
+                          }}
+                        >
+                          {task.status}
+                        </span>
+                      </div>
+
+                      <div className="task-meta">
+                        <p>Created by: {task.createdBy}</p>
+                        {task.assignedTo !== "Unassigned" && (
+                          <p className="task-assignee">
+                            Assigned to: {task.assignedTo}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </button>
                 ))}

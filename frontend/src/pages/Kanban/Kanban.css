@@ -127,15 +127,19 @@ p {
   overflow-y: auto;
 }
 
+/* Updated task card styles */
 .task-card {
   background-color: #ffffff;
   border-radius: 10px;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid #e8e8e8;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
   cursor: pointer;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .task-card:hover {
@@ -148,7 +152,6 @@ p {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .task-icon {
@@ -173,11 +176,19 @@ p {
   font-size: 13px;
   color: #6b6b6b;
   line-height: 1.6;
-  margin: 0 0 14px 0;
+  margin: 0;
 }
 
 .task-footer {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.task-status-row {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -189,6 +200,27 @@ p {
   font-weight: 600;
   letter-spacing: 0.2px;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.task-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b6b6b;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.task-meta p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.task-assignee {
+  font-weight: 500;
+  color: #464646;
 }
 
 /* Members Section */
