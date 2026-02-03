@@ -2,26 +2,18 @@ import {
   assignUserToTask,
   unassignUserFromTask,
 } from "../models/taskAssignment.js";
-import { getUserByEmailForAssignment } from "../models/user.js";
 import { getTaskById } from "../models/task.js";
 
 export async function assignUserToTaskController(req, res) {
   try {
     const task_id = req.params.id;
-    const { email } = req.body;
+    const { user_id } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ error: "email is required" });
+    if (!user_id) {
+      return res.status(400).json({ error: "user id is required" });
     }
 
-    // Search for user by email
-    const user = await getUserByEmailForAssignment(email);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    const assignment = await assignUserToTask(user.user_id, task_id);
+    const assignment = await assignUserToTask(user_id, task_id);
 
     res.status(201).json(assignment);
   } catch (err) {

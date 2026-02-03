@@ -67,7 +67,18 @@ export async function getProjectById(project_id) {
 export async function getAllTasksForProject(project_id) {
   try {
     const res = await client.query(
-      "SELECT task_id, title, description, status, created_by, created_at, updated_at from tasks where project_id = $1",
+      `SELECT 
+        t.task_id, 
+        t.title, 
+        t.description, 
+        t.status, 
+        t.created_by, 
+        t.created_at, 
+        t.updated_at,
+        ta.user_id AS assigned_to
+      FROM tasks t
+      LEFT JOIN task_assignment ta ON t.task_id = ta.task_id
+      WHERE t.project_id = $1`,
       [project_id],
     );
 

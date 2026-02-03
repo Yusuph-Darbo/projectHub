@@ -39,6 +39,7 @@ export default function Kanban() {
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
+  const [assignee, setAssignee] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [projectOwner, setProjectOwner] = useState(null);
 
@@ -140,11 +141,17 @@ export default function Kanban() {
       if (column) {
         column.tasks.push({
           id: task.task_id,
+          // Preserve original fields so we keep IDs
           title: task.title,
           description: task.description,
           status: task.status,
-          createdBy: userMap[task.created_by] ?? "Unknown user",
-          assignedTo: task.assigned_to ?? "Unassigned",
+          created_by: task.created_by,
+          assigned_to: task.assigned_to,
+          // Derived display fields
+          createdByLabel: userMap[task.created_by] ?? "Unknown user",
+          assignedToLabel: task.assigned_to
+            ? userMap[task.assigned_to]
+            : "Unassigned",
           statusColor: column.statusColor,
           statusTextColor: column.statusTextColor,
         });
@@ -167,7 +174,13 @@ export default function Kanban() {
         description,
       });
 
-      setTasks((prev) => [newTask, ...prev]);
+      // If assignee is selected, assign user to the newly created task
+      if (assignee) {
+        await handleTaskAssignment(newTask.task_id, assignee);
+      } else {
+        // Just add the task to the list if no assignment
+        setTasks((prev) => [newTask, ...prev]);
+      }
 
       closeCard();
 
@@ -226,10 +239,24 @@ export default function Kanban() {
         updatedTask = await editTaskStatus(activeTask.id, status);
       }
 
-      // Rendering the updated task list
-      setTasks((prev) =>
-        prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
-      );
+      // Handle assignment/unassignment
+      const assignmentChanged = assignee !== (activeTask.assigned_to ?? "");
+      if (assignmentChanged) {
+        if (assignee) {
+          // Assign user to task
+          await handleTaskAssignment(activeTask.id, assignee);
+        } else if (activeTask.assigned_to) {
+          // Unassign: remove current assignment
+          await removeUserFromTask(activeTask.id, activeTask.assigned_to);
+          const updatedTasks = await getProjectTasks(projectId);
+          setTasks(updatedTasks);
+        }
+      } else {
+        // Only update task list if assignment didn't change
+        setTasks((prev) =>
+          prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
+        );
+      }
 
       closeCard();
 
@@ -284,6 +311,24 @@ export default function Kanban() {
     }
   }
 
+  async function handleTaskAssignment(task_id, user_id) {
+    if (!user_id) return;
+
+    try {
+      await assignUserToTask(task_id, user_id);
+
+      // Refetch tasks to get updated assignment data
+      const updatedTasks = await getProjectTasks(projectId);
+      setTasks(updatedTasks);
+
+      toast.success("User assigned to task successfully");
+    } catch (err) {
+      console.error("Failed to assign member to task:", err.message);
+      toast.error("Failed to assign user to task");
+      throw err; // Re-throw so handleUpdateTask can catch it
+    }
+  }
+
   // The data formatted
   const columns = formatKanbanColumns(tasks);
 
@@ -292,6 +337,8 @@ export default function Kanban() {
     setActiveTask(null);
     setTitle("");
     setDescription("");
+    setStatus("To Do");
+    setAssignee("");
   }
 
   function editCard(task) {
@@ -300,6 +347,8 @@ export default function Kanban() {
     setTitle(task.title);
     setDescription(task.description);
     setStatus(task.status);
+    // Pre-select current assignee by user ID, or empty if unassigned
+    setAssignee(task.assigned_to ?? "");
   }
 
   function closeCard() {
@@ -387,10 +436,10 @@ export default function Kanban() {
                       </div>
 
                       <div className="task-meta">
-                        <p>Created by: {task.createdBy}</p>
-                        {task.assignedTo !== "Unassigned" && (
+                        <p>Created by: {task.createdByLabel}</p>
+                        {task.assignedToLabel !== "Unassigned" && (
                           <p className="task-assignee">
-                            Assigned to: {task.assignedTo}
+                            Assigned to: {task.assignedToLabel}
                           </p>
                         )}
                       </div>
@@ -524,6 +573,23 @@ export default function Kanban() {
                   <option value="To Do">To Do</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Done">Done</option>
+                </select>
+
+                <label htmlFor="task-assignment">Assign member to task</label>
+                <select
+                  id="task-assignment"
+                  className="form-status"
+                  value={assignee}
+                  onChange={(e) => setAssignee(e.target.value)}
+                >
+                  <option value="">Unassigned</option>
+
+                  {displayMembers.map((member) => (
+                    <option key={member.user_id} value={member.user_id}>
+                      {member.name}
+                      {currentUser?.id === member.user_id ? " (You)" : ""}
+                    </option>
+                  ))}
                 </select>
               </div>
             </CardContent>

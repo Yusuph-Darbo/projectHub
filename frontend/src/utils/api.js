@@ -132,10 +132,10 @@ export async function removeUserFromProject(project_id, user_id) {
   });
 }
 
-export async function assignUserToTask(task_id, email) {
+export async function assignUserToTask(task_id, user_id) {
   return apiRequest(`/task-assignment/${task_id}/assign`, {
     method: "POST",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ user_id }),
   });
 }
 

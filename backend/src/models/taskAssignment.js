@@ -2,6 +2,13 @@ import client from "../config/db.js";
 
 export async function assignUserToTask(user_id, task_id) {
   try {
+    // First, delete any existing assignment for this task
+    await client.query(
+      `DELETE FROM task_assignment WHERE task_id = $1`,
+      [task_id]
+    );
+
+    // Then insert the new assignment
     const res = await client.query(
       `INSERT INTO task_assignment (user_id, task_id)
             VALUES ($1, $2)
