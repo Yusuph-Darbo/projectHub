@@ -176,6 +176,11 @@ p {
   margin: 0 0 14px 0;
 }
 
+.task-footer {
+  display: flex;
+  justify-content: space-between;
+}
+
 .task-status {
   display: inline-block;
   padding: 5px 12px;

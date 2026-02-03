@@ -1,3 +1,5 @@
+import { BedDouble } from "lucide-react";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
@@ -127,6 +129,20 @@ export async function getMembersOfProject(project_id) {
 
 export async function removeUserFromProject(project_id, user_id) {
   return apiRequest(`/projects/${project_id}/unassign`, {
+    method: "DELETE",
+    body: JSON.stringify({ user_id }),
+  });
+}
+
+export async function assignUserToTask(task_id, email) {
+  return apiRequest(`/task-assignment/${task_id}/assign`, {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function removeUserFromTask(task_id, user_id) {
+  return apiRequest(`/task-assignment/${task_id}/unassign`, {
     method: "DELETE",
     body: JSON.stringify({ user_id }),
   });

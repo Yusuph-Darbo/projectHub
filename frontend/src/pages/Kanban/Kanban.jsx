@@ -11,6 +11,8 @@ import {
   assignUserToProject,
   getProjectOwner,
   removeUserFromProject,
+  assignUserToTask,
+  removeUserFromTask,
 } from "../../utils/api.js";
 import {
   Card,
@@ -23,7 +25,7 @@ import {
 } from "../../components/ui/card.jsx";
 import { toast } from "sonner";
 import { FaPlus } from "react-icons/fa";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
 
@@ -54,6 +56,7 @@ export default function Kanban() {
       try {
         const data = await getProjectTasks(projectId);
         setTasks(data);
+        console.log(data);
       } catch (err) {
         console.error("Failed to fetch tasks:", err.message);
       }
@@ -65,6 +68,7 @@ export default function Kanban() {
       try {
         const members = await getMembersOfProject(projectId);
         setMembers(members);
+        console.log(members);
       } catch (err) {
         console.error("Failed to fetch members:", err);
       }
@@ -81,6 +85,22 @@ export default function Kanban() {
     }
     fetchOwner();
   }, [projectId]);
+
+  // cache the result of a calculation between re-renders.
+  const userMap = useMemo(() => {
+    const map = {};
+
+    // Creating a dictionary between user_id and names
+    members.forEach((m) => {
+      map[m.user_id] = m.name;
+    });
+
+    if (projectOwner) {
+      map[projectOwner.user_id] = projectOwner.name;
+    }
+
+    return map;
+  }, [members, projectOwner]);
 
   const columnConfig = {
     "To Do": {
@@ -125,6 +145,7 @@ export default function Kanban() {
           title: task.title,
           description: task.description,
           status: task.status,
+          createdBy: userMap[task.created_by] ?? "Unknown user",
           statusColor: column.statusColor,
           statusTextColor: column.statusTextColor,
         });
@@ -350,16 +371,20 @@ export default function Kanban() {
                       <h3 className="task-title">{task.title}</h3>
                     </div>
                     <p className="task-description">{task.description}</p>
-                    <span
-                      className="task-status"
-                      style={{
-                        backgroundColor: task.statusColor,
-                        color: task.statusTextColor,
-                        border: `1px solid ${column.borderColor}`,
-                      }}
-                    >
-                      {task.status}
-                    </span>
+                    <div className="task-footer">
+                      <span
+                        className="task-status"
+                        style={{
+                          backgroundColor: task.statusColor,
+                          color: task.statusTextColor,
+                          border: `1px solid ${column.borderColor}`,
+                        }}
+                      >
+                        {task.status}
+                      </span>
+
+                      <p>Created by: {task.createdBy}</p>
+                    </div>
                   </button>
                 ))}
               </div>

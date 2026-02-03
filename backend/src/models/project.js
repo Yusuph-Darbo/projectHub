@@ -67,7 +67,7 @@ export async function getProjectById(project_id) {
 export async function getAllTasksForProject(project_id) {
   try {
     const res = await client.query(
-      "SELECT task_id, title, description, status, created_at, updated_at from tasks where project_id = $1",
+      "SELECT task_id, title, description, status, created_by, created_at, updated_at from tasks where project_id = $1",
       [project_id],
     );
 
