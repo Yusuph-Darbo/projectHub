@@ -10,7 +10,7 @@ export async function createTask({
     const res = await client.query(
       // Dont need to assign status as tasks are 'To Do' be default in DB
       "INSERT INTO tasks (title, description, project_id, created_by) VALUES ($1, $2, $3, $4) RETURNING *",
-      [title, description, project_id, created_by]
+      [title, description, project_id, created_by],
     );
     return res.rows[0];
   } catch (err) {
@@ -36,7 +36,7 @@ export async function updateTask(task_id, updates) {
   try {
     // Getting the update as an objet and filtering out the undefined entries
     const entries = Object.entries(updates).filter(
-      ([_, value]) => value !== undefined
+      ([_, value]) => value !== undefined,
     );
 
     // Checking for no updates
@@ -54,7 +54,7 @@ export async function updateTask(task_id, updates) {
             SET ${setClause}
             WHERE task_id = $${values.length}
             RETURNING *`,
-      values
+      values,
     );
     return res.rows[0];
   } catch (err) {
@@ -70,7 +70,7 @@ export async function updateTaskStatus(task_id, status) {
              SET status = $1
              WHERE task_id = $2
              RETURNING *`,
-      [status, task_id]
+      [status, task_id],
     );
 
     return res.rows[0];
@@ -82,9 +82,15 @@ export async function updateTaskStatus(task_id, status) {
 
 export async function deleteTask(task_id) {
   try {
+    // First, delete any task assignments to avoid foreign key constraint violation
+    await client.query("DELETE FROM task_assignment WHERE task_id = $1", [
+      task_id,
+    ]);
+
+    // Then delete the task itself
     const res = await client.query(
       "DELETE FROM tasks WHERE task_id = $1 RETURNING *",
-      [task_id]
+      [task_id],
     );
 
     return res.rows[0];

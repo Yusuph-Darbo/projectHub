@@ -259,8 +259,6 @@ export default function Kanban() {
       }
 
       closeCard();
-
-      toast.success("Successfully updated task");
     } catch (err) {
       console.error("Failed to edit task:", err.message);
       toast.error("Failed to edit task");
