@@ -29,6 +29,7 @@ import {
   useSensor,
   useSensors,
   useDroppable,
+  DragOverlay,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -46,6 +47,7 @@ export default function Kanban() {
   // Has 3 modes = null || "create" || "edit" || "memberCreate"
   const [cardMode, setCardMode] = useState(null);
   const [activeTask, setActiveTask] = useState(null);
+  const [activeDragTask, setActiveDragTask] = useState(null); // For drag overlay
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("To Do");
@@ -209,12 +211,19 @@ export default function Kanban() {
   }
 
   function SortableTask({ task, borderColor }) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
-      useSortable({ id: task.id });
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({ id: task.id });
 
     const style = {
       transform: CSS.Transform.toString(transform),
       transition,
+      opacity: isDragging ? 0.5 : 1,
     };
 
     return (
@@ -258,6 +267,44 @@ export default function Kanban() {
           </div>
         </div>
       </button>
+    );
+  }
+
+  // Task card for the drag overlay
+  function TaskCard({ task, borderColor }) {
+    return (
+      <div className="task-card" style={{ cursor: "grabbing" }}>
+        <div className="task-header">
+          <AiOutlineHolder className="task-icon" />
+          <h3 className="task-title">{task.title}</h3>
+        </div>
+
+        <p className="task-description">{task.description}</p>
+
+        <div className="task-footer">
+          <div className="task-status-row">
+            <span
+              className="task-status"
+              style={{
+                backgroundColor: task.statusColor,
+                color: task.statusTextColor,
+                border: `1px solid ${borderColor}`,
+              }}
+            >
+              {task.status}
+            </span>
+          </div>
+
+          <div className="task-meta">
+            <p>Created by: {task.createdByLabel}</p>
+            {task.assignedToLabel !== "Unassigned" && (
+              <p className="task-assignee">
+                Assigned to: {task.assignedToLabel}
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -365,8 +412,22 @@ export default function Kanban() {
     }
   }
 
+  function handleDragStart(event) {
+    const { active } = event;
+
+    // Find all tasks across all columns
+    const allTasks = columns.flatMap((col) => col.tasks);
+    const draggedTask = allTasks.find((t) => t.id === active.id);
+
+    if (draggedTask) {
+      setActiveDragTask(draggedTask);
+    }
+  }
+
   function handleDragEnd(event) {
     const { active, over } = event;
+
+    setActiveDragTask(null); // Clear drag overlay
 
     if (!over) return;
 
@@ -400,6 +461,10 @@ export default function Kanban() {
         })
         .catch(() => toast.error("Failed to update task status"));
     }
+  }
+
+  function handleDragCancel() {
+    setActiveDragTask(null);
   }
 
   async function handleAddMember() {
@@ -525,7 +590,12 @@ export default function Kanban() {
         </div>
       </div>
 
-      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+      <DndContext
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+        sensors={sensors}
+      >
         <div className="kanban-container">
           <div className="kanban-board">
             {columns.map((column) => (
@@ -552,6 +622,17 @@ export default function Kanban() {
             ))}
           </div>
         </div>
+
+        <DragOverlay>
+          {activeDragTask ? (
+            <TaskCard
+              task={activeDragTask}
+              borderColor={
+                columnConfig[activeDragTask.status]?.borderColor || "#CAD5E2"
+              }
+            />
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       <div className="home-container">
