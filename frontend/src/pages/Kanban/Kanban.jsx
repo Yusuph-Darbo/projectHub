@@ -23,12 +23,19 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
-import { DndContext } from "@dnd-kit/core";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { FaPlus } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
@@ -51,6 +58,15 @@ export default function Kanban() {
 
   const { projectId } = useParams(); // grabs projectId from URL
   const currentUser = getCurrentUser();
+
+  // Configure sensors for drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px of movement before drag starts
+      },
+    }),
+  );
 
   // Check if current user is the owner
   const isOwner =
@@ -169,14 +185,35 @@ export default function Kanban() {
     return columns;
   }
 
+  function DroppableColumn({ column, children }) {
+    const { setNodeRef } = useDroppable({
+      id: column.id,
+      data: {
+        type: "column",
+        status: column.title,
+      },
+    });
+
+    return (
+      <div
+        ref={setNodeRef}
+        className="kanban-column"
+        style={{
+          backgroundColor: column.bgColor,
+          border: `2px solid ${column.borderColor}`,
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+
   function SortableTask({ task, borderColor }) {
     const { attributes, listeners, setNodeRef, transform, transition } =
       useSortable({ id: task.id });
 
     const style = {
-      transform: transform
-        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
-        : undefined,
+      transform: CSS.Transform.toString(transform),
       transition,
     };
 
@@ -331,16 +368,31 @@ export default function Kanban() {
   function handleDragEnd(event) {
     const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+    if (!over) return;
 
     const activeTask = tasks.find((t) => t.task_id === active.id);
-    const overTask = tasks.find((t) => t.task_id === over.id);
+    if (!activeTask) return;
 
-    if (!activeTask || !overTask) return;
+    let newStatus = null;
 
-    // If moved to another column → update status
-    if (activeTask.status !== overTask.status) {
-      editTaskStatus(activeTask.task_id, overTask.status)
+    // Check if dropped on another task
+    if (over.data?.current?.type !== "column") {
+      const overTask = tasks.find((t) => t.task_id === over.id);
+      if (overTask && activeTask.status !== overTask.status) {
+        newStatus = overTask.status;
+      }
+    }
+    // Check if dropped on a column
+    else if (over.data?.current?.type === "column") {
+      const targetStatus = over.data.current.status;
+      if (activeTask.status !== targetStatus) {
+        newStatus = targetStatus;
+      }
+    }
+
+    // Update status if it changed
+    if (newStatus) {
+      editTaskStatus(activeTask.task_id, newStatus)
         .then(async () => {
           const updated = await getProjectTasks(projectId);
           setTasks(updated);
@@ -473,18 +525,11 @@ export default function Kanban() {
         </div>
       </div>
 
-      <div className="kanban-container">
-        <div className="kanban-board">
-          <DndContext onDragEnd={handleDragEnd}>
+      <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+        <div className="kanban-container">
+          <div className="kanban-board">
             {columns.map((column) => (
-              <div
-                key={column.id}
-                className="kanban-column"
-                style={{
-                  backgroundColor: column.bgColor,
-                  border: `2px solid ${column.borderColor}`,
-                }}
-              >
+              <DroppableColumn key={column.id} column={column}>
                 <div className="column-header">
                   <h2 className="column-title">{column.title}</h2>
                   <span className="column-count">{column.count}</span>
@@ -493,18 +538,21 @@ export default function Kanban() {
                   <SortableContext
                     items={column.tasks.map((t) => t.id)}
                     strategy={verticalListSortingStrategy}
-                    borderColor={column.borderColor}
                   >
                     {column.tasks.map((task) => (
-                      <SortableTask key={task.id} task={task} />
+                      <SortableTask
+                        key={task.id}
+                        task={task}
+                        borderColor={column.borderColor}
+                      />
                     ))}
                   </SortableContext>
                 </div>
-              </div>
+              </DroppableColumn>
             ))}
-          </DndContext>
+          </div>
         </div>
-      </div>
+      </DndContext>
 
       <div className="home-container">
         <div className="home-header">
