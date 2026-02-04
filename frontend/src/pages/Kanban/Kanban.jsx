@@ -23,7 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
-import { closestCorners, DndContext } from "@dnd-kit/core";
+import { DndContext } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -169,6 +169,61 @@ export default function Kanban() {
     return columns;
   }
 
+  function SortableTask({ task, borderColor }) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+      useSortable({ id: task.id });
+
+    const style = {
+      transform: transform
+        ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+        : undefined,
+      transition,
+    };
+
+    return (
+      <button
+        key={task.id}
+        className="task-card"
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        onClick={() => editCard(task)}
+      >
+        <div className="task-header">
+          <AiOutlineHolder className="task-icon" />
+          <h3 className="task-title">{task.title}</h3>
+        </div>
+
+        <p className="task-description">{task.description}</p>
+
+        <div className="task-footer">
+          <div className="task-status-row">
+            <span
+              className="task-status"
+              style={{
+                backgroundColor: task.statusColor,
+                color: task.statusTextColor,
+                border: `1px solid ${borderColor}`,
+              }}
+            >
+              {task.status}
+            </span>
+          </div>
+
+          <div className="task-meta">
+            <p>Created by: {task.createdByLabel}</p>
+            {task.assignedToLabel !== "Unassigned" && (
+              <p className="task-assignee">
+                Assigned to: {task.assignedToLabel}
+              </p>
+            )}
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   async function handleCreateTask() {
     if (!title.trim() || !description.trim()) return;
 
@@ -270,6 +325,28 @@ export default function Kanban() {
       toast.error("Failed to edit task");
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  function handleDragEnd(event) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const activeTask = tasks.find((t) => t.task_id === active.id);
+    const overTask = tasks.find((t) => t.task_id === over.id);
+
+    if (!activeTask || !overTask) return;
+
+    // If moved to another column → update status
+    if (activeTask.status !== overTask.status) {
+      editTaskStatus(activeTask.task_id, overTask.status)
+        .then(async () => {
+          const updated = await getProjectTasks(projectId);
+          setTasks(updated);
+          toast.success("Task status updated");
+        })
+        .catch(() => toast.error("Failed to update task status"));
     }
   }
 
@@ -398,7 +475,7 @@ export default function Kanban() {
 
       <div className="kanban-container">
         <div className="kanban-board">
-          <DndContext collisionDetection={closestCorners}>
+          <DndContext onDragEnd={handleDragEnd}>
             {columns.map((column) => (
               <div
                 key={column.id}
@@ -414,46 +491,12 @@ export default function Kanban() {
                 </div>
                 <div className="column-content">
                   <SortableContext
-                    items={tasks}
+                    items={column.tasks.map((t) => t.id)}
                     strategy={verticalListSortingStrategy}
+                    borderColor={column.borderColor}
                   >
                     {column.tasks.map((task) => (
-                      <button
-                        key={task.id}
-                        className="task-card"
-                        onClick={() => editCard(task)}
-                      >
-                        <div className="task-header">
-                          <AiOutlineHolder className="task-icon" />
-                          <h3 className="task-title">{task.title}</h3>
-                        </div>
-
-                        <p className="task-description">{task.description}</p>
-
-                        <div className="task-footer">
-                          <div className="task-status-row">
-                            <span
-                              className="task-status"
-                              style={{
-                                backgroundColor: task.statusColor,
-                                color: task.statusTextColor,
-                                border: `1px solid ${column.borderColor}`,
-                              }}
-                            >
-                              {task.status}
-                            </span>
-                          </div>
-
-                          <div className="task-meta">
-                            <p>Created by: {task.createdByLabel}</p>
-                            {task.assignedToLabel !== "Unassigned" && (
-                              <p className="task-assignee">
-                                Assigned to: {task.assignedToLabel}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </button>
+                      <SortableTask key={task.id} task={task} />
                     ))}
                   </SortableContext>
                 </div>
