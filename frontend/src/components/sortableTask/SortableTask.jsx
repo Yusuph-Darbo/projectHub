@@ -2,7 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { AiOutlineHolder } from "react-icons/ai";
 import "./SortableTask.css";
 
-export function SortableTask({ task, onClick }) {
+export default function SortableTask({ task, onClick }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task.id });
 
