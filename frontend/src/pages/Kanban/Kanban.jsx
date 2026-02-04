@@ -560,36 +560,38 @@ export default function Kanban() {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="task-status">Status</label>
-                <select
-                  id="task-status"
-                  className="form-status"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Done">Done</option>
-                </select>
+              {cardMode === "edit" && (
+                <div className="form-group">
+                  <label htmlFor="task-status">Status</label>
+                  <select
+                    id="task-status"
+                    className="form-status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Done">Done</option>
+                  </select>
 
-                <label htmlFor="task-assignment">Assign member to task</label>
-                <select
-                  id="task-assignment"
-                  className="form-status"
-                  value={assignee}
-                  onChange={(e) => setAssignee(e.target.value)}
-                >
-                  <option value="">Unassigned</option>
+                  <label htmlFor="task-assignment">Assign member to task</label>
+                  <select
+                    id="task-assignment"
+                    className="form-status"
+                    value={assignee}
+                    onChange={(e) => setAssignee(e.target.value)}
+                  >
+                    <option value="">Unassigned</option>
 
-                  {displayMembers.map((member) => (
-                    <option key={member.user_id} value={member.user_id}>
-                      {member.name}
-                      {currentUser?.id === member.user_id ? " (You)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                    {displayMembers.map((member) => (
+                      <option key={member.user_id} value={member.user_id}>
+                        {member.name}
+                        {currentUser?.id === member.user_id ? " (You)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </CardContent>
 
             <CardFooter>
