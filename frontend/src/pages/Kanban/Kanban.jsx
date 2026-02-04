@@ -23,6 +23,12 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
+import { closestCorners, DndContext } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import { FaPlus } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
@@ -392,61 +398,68 @@ export default function Kanban() {
 
       <div className="kanban-container">
         <div className="kanban-board">
-          {columns.map((column) => (
-            <div
-              key={column.id}
-              className="kanban-column"
-              style={{
-                backgroundColor: column.bgColor,
-                border: `2px solid ${column.borderColor}`,
-              }}
-            >
-              <div className="column-header">
-                <h2 className="column-title">{column.title}</h2>
-                <span className="column-count">{column.count}</span>
-              </div>
-              <div className="column-content">
-                {column.tasks.map((task) => (
-                  <button
-                    key={task.id}
-                    className="task-card"
-                    onClick={() => editCard(task)}
+          <DndContext collisionDetection={closestCorners}>
+            {columns.map((column) => (
+              <div
+                key={column.id}
+                className="kanban-column"
+                style={{
+                  backgroundColor: column.bgColor,
+                  border: `2px solid ${column.borderColor}`,
+                }}
+              >
+                <div className="column-header">
+                  <h2 className="column-title">{column.title}</h2>
+                  <span className="column-count">{column.count}</span>
+                </div>
+                <div className="column-content">
+                  <SortableContext
+                    items={tasks}
+                    strategy={verticalListSortingStrategy}
                   >
-                    <div className="task-header">
-                      <AiOutlineHolder className="task-icon" />
-                      <h3 className="task-title">{task.title}</h3>
-                    </div>
+                    {column.tasks.map((task) => (
+                      <button
+                        key={task.id}
+                        className="task-card"
+                        onClick={() => editCard(task)}
+                      >
+                        <div className="task-header">
+                          <AiOutlineHolder className="task-icon" />
+                          <h3 className="task-title">{task.title}</h3>
+                        </div>
 
-                    <p className="task-description">{task.description}</p>
+                        <p className="task-description">{task.description}</p>
 
-                    <div className="task-footer">
-                      <div className="task-status-row">
-                        <span
-                          className="task-status"
-                          style={{
-                            backgroundColor: task.statusColor,
-                            color: task.statusTextColor,
-                            border: `1px solid ${column.borderColor}`,
-                          }}
-                        >
-                          {task.status}
-                        </span>
-                      </div>
+                        <div className="task-footer">
+                          <div className="task-status-row">
+                            <span
+                              className="task-status"
+                              style={{
+                                backgroundColor: task.statusColor,
+                                color: task.statusTextColor,
+                                border: `1px solid ${column.borderColor}`,
+                              }}
+                            >
+                              {task.status}
+                            </span>
+                          </div>
 
-                      <div className="task-meta">
-                        <p>Created by: {task.createdByLabel}</p>
-                        {task.assignedToLabel !== "Unassigned" && (
-                          <p className="task-assignee">
-                            Assigned to: {task.assignedToLabel}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                          <div className="task-meta">
+                            <p>Created by: {task.createdByLabel}</p>
+                            {task.assignedToLabel !== "Unassigned" && (
+                              <p className="task-assignee">
+                                Assigned to: {task.assignedToLabel}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </SortableContext>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </DndContext>
         </div>
       </div>
 
