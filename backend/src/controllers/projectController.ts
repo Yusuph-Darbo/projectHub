@@ -10,6 +10,7 @@ import {
 import { addUserToProject } from "../models/projectAssignment.js";
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../types/models/auth.js";
+import type { Project } from "../types/models/project.js";
 
 export async function createProjectController(
   req: AuthenticatedRequest,
@@ -94,7 +95,7 @@ export async function getProjectByIdController(
 }
 
 export async function updateProjectController(
-  req: AuthenticatedRequest,
+  req: AuthenticatedRequest<{ id: string }, any, Project>,
   res: Response,
 ): Promise<void> {
   try {
