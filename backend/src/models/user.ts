@@ -64,7 +64,7 @@ export async function updateUser(
       .map((key, index) => `${key} = $${index + 1}`)
       .join(", ");
     const values = Object.values(updates);
-    values.push(user_id); // Add user_id for WHERE clause
+    values.push(String(user_id)); // Add user_id for WHERE clause
 
     const res = await client.query(
       `UPDATE users

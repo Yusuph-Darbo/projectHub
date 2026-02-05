@@ -1,8 +1,13 @@
 import { createUser, getUserByEmail } from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import type { Request, Response } from "express";
+import type { LoginBody, RegisterBody } from "../types/models/auth.js";
 
-export async function register(req, res) {
+export async function register(
+  req: Request<{}, any, RegisterBody>,
+  res: Response,
+): Promise<void> {
   // Object destructuring
   const { name, email, password } = req.body;
 
@@ -10,7 +15,8 @@ export async function register(req, res) {
     const existingUser = await getUserByEmail(email);
 
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      res.status(400).json({ error: "User already exists" });
+      return;
     }
 
     // 10 salt rounds - Adding 10 random strings before hashing
@@ -24,7 +30,7 @@ export async function register(req, res) {
     });
 
     res.status(201).json({
-      id: newUser.id,
+      id: newUser.user_id,
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
@@ -34,18 +40,23 @@ export async function register(req, res) {
   }
 }
 
-export async function login(req, res) {
+export async function login(
+  req: Request<{}, any, LoginBody>,
+  res: Response,
+): Promise<void> {
   const { email, password } = req.body;
 
   try {
     const user = await getUserByEmail(email);
     if (!user) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      res.status(400).json({ error: "Invalid credentials" });
+      return;
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: "Invalid credentials" });
+      res.status(400).json({ error: "Invalid credentials" });
+      return;
     }
 
     /* Create a JWT token containing the user's ID, signed with the server secret
@@ -53,8 +64,13 @@ export async function login(req, res) {
            Authenticates and authorises users which allows users to create tasks only if they
            are logged in / view projects they are apart of
         */
+    const jwtSecret = process.env.JWT_SECRET;
 
-    const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET, {
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET is not defined");
+    }
+
+    const token = jwt.sign({ id: user.user_id }, jwtSecret, {
       expiresIn: "1h",
     });
 

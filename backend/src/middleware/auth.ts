@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
 
 /* Intercepts the request to the controllers and verifies user using jwt,
    if the user is verified will pass the request along 
@@ -6,15 +6,7 @@ import type { Request, Response, NextFunction } from "express";
 
 import jwt from "jsonwebtoken";
 import { getUserById } from "../models/user.js";
-
-interface AuthenticatedRequest extends Request {
-  // Adding a optional property to req
-  user?: {
-    id: number;
-    email: string;
-    role: string;
-  };
-}
+import type { AuthenticatedRequest } from "../types/models/auth.js";
 
 interface JwtPayload {
   id: number;
@@ -54,7 +46,7 @@ export async function requireAuth(
 
     // Attaching user to request
     req.user = {
-      id: user.id,
+      id: user.user_id,
       email: user.email,
       role: user.role,
     };

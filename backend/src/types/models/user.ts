@@ -6,7 +6,7 @@ export interface CreateUser {
 }
 
 export interface User {
-  id: number;
+  user_id: number;
   name: string;
   email: string;
   password: string;
@@ -15,7 +15,7 @@ export interface User {
 }
 
 export interface PublicUser {
-  id: number;
+  user_id: number;
   name: string;
   email: string;
   role: string;
