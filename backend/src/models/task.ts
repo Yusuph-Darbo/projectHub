@@ -1,11 +1,20 @@
 import client from "../config/db.js";
+import type { CreateTask, Task } from "../types/models/task.js";
+
+// Can only update title, description and / or status
+type TaskUpdates = Partial<
+  Omit<
+    Task,
+    "task_id" | "created_by" | "project_id" | "created_at" | "updated_at"
+  >
+>;
 
 export async function createTask({
   title,
   description,
   project_id,
   created_by,
-}) {
+}: CreateTask): Promise<Task> {
   try {
     const res = await client.query(
       // Dont need to assign status as tasks are 'To Do' be default in DB
@@ -19,7 +28,7 @@ export async function createTask({
   }
 }
 
-export async function getTaskById(task_id) {
+export async function getTaskById(task_id: number): Promise<Task | undefined> {
   try {
     const res = await client.query("SELECT * FROM tasks where task_id = $1", [
       task_id,
@@ -32,7 +41,10 @@ export async function getTaskById(task_id) {
   }
 }
 
-export async function updateTask(task_id, updates) {
+export async function updateTask(
+  task_id: number,
+  updates: TaskUpdates,
+): Promise<Task | null> {
   try {
     // Getting the update as an objet and filtering out the undefined entries
     const entries = Object.entries(updates).filter(
@@ -46,7 +58,7 @@ export async function updateTask(task_id, updates) {
       .map(([key], index) => `${key} = $${index + 1}`)
       .join(", ");
 
-    const values = entries.map(([_, value]) => value);
+    const values: (string | number)[] = entries.map(([_, value]) => value);
     values.push(task_id); // Add task_id for WHERE clause
 
     const res = await client.query(
@@ -63,7 +75,11 @@ export async function updateTask(task_id, updates) {
   }
 }
 
-export async function updateTaskStatus(task_id, status) {
+// status only allows To Do, In Progress etc.
+export async function updateTaskStatus(
+  task_id: number,
+  status: Task["status"],
+): Promise<Task | undefined> {
   try {
     const res = await client.query(
       `UPDATE tasks
@@ -80,7 +96,7 @@ export async function updateTaskStatus(task_id, status) {
   }
 }
 
-export async function deleteTask(task_id) {
+export async function deleteTask(task_id: number): Promise<Task | undefined> {
   try {
     // First, delete any task assignments to avoid foreign key constraint violation
     await client.query("DELETE FROM task_assignment WHERE task_id = $1", [
