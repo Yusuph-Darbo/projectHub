@@ -35,7 +35,7 @@ export async function createProject({
 }
 
 export async function getProjectByUser(
-  user_id: string,
+  user_id: number,
 ): Promise<ProjectWithOwner[]> {
   try {
     const res = await client.query(
