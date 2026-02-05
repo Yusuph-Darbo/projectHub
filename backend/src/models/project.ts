@@ -1,11 +1,32 @@
 import client from "../config/db.js";
+import type {
+  CreateProject,
+  Project,
+  ProjectWithOwner,
+  ProjectTask,
+} from "../types/models/project.js";
 
-export async function createProject({ name, description, owner_id }) {
+// Updates are optional and cannot update user_id and created_at
+type ProjectUpdates = Partial<
+  Omit<Project, "user_id" | "created_at" | "owner_id">
+>;
+
+type ProjectOwner = {
+  user_id: number;
+  name: string;
+};
+
+export async function createProject({
+  name,
+  description,
+  owner_id,
+}: CreateProject): Promise<Project> {
   try {
     const res = await client.query(
       "INSERT INTO projects (name, description, owner_id) VALUES ($1, $2, $3) RETURNING *",
       [name, description, owner_id],
     );
+
     return res.rows[0];
   } catch (err) {
     console.error("Error creating project:", err);
@@ -13,7 +34,9 @@ export async function createProject({ name, description, owner_id }) {
   }
 }
 
-export async function getProjectByUser(user_id) {
+export async function getProjectByUser(
+  user_id: string,
+): Promise<ProjectWithOwner[]> {
   try {
     const res = await client.query(
       `
@@ -29,6 +52,7 @@ export async function getProjectByUser(user_id) {
       `,
       [user_id],
     );
+
     return res.rows;
   } catch (err) {
     console.error("Error fetching projects for user:", err);
@@ -36,7 +60,8 @@ export async function getProjectByUser(user_id) {
   }
 }
 
-export async function getProjectByOwner(owner_id) {
+// No need to for null as it will return a empty array
+export async function getProjectByOwner(owner_id: number): Promise<Project[]> {
   try {
     const res = await client.query(
       "SELECT * FROM projects WHERE owner_id = $1",
@@ -50,7 +75,9 @@ export async function getProjectByOwner(owner_id) {
   }
 }
 
-export async function getProjectById(project_id) {
+export async function getProjectById(
+  project_id: number,
+): Promise<Project | undefined> {
   try {
     const res = await client.query(
       "SELECT * FROM projects WHERE project_id = $1",
@@ -64,7 +91,9 @@ export async function getProjectById(project_id) {
   }
 }
 
-export async function getAllTasksForProject(project_id) {
+export async function getAllTasksForProject(
+  project_id: number,
+): Promise<ProjectTask[]> {
   try {
     const res = await client.query(
       `SELECT 
@@ -89,7 +118,9 @@ export async function getAllTasksForProject(project_id) {
   }
 }
 
-export async function getOwnerOfProject(project_id) {
+export async function getOwnerOfProject(
+  project_id: number,
+): Promise<ProjectOwner | undefined> {
   try {
     const res = await client.query(
       `
@@ -109,7 +140,10 @@ export async function getOwnerOfProject(project_id) {
   }
 }
 
-export async function updateProject(project_id, updates) {
+export async function updateProject(
+  project_id: number,
+  updates: ProjectUpdates,
+): Promise<Project | null> {
   try {
     // Getting the update as an objet and filtering out the undefined entries
     const entries = Object.entries(updates).filter(
@@ -140,7 +174,9 @@ export async function updateProject(project_id, updates) {
   }
 }
 
-export async function deleteProject(project_id) {
+export async function deleteProject(
+  project_id: number,
+): Promise<Project | null> {
   try {
     const res = await client.query(
       "DELETE FROM projects WHERE project_id = $1 RETURNING *",
