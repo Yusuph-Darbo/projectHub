@@ -3,13 +3,16 @@ import {
   unassignUserFromTask,
 } from "../models/taskAssignment.js";
 import { getTaskById } from "../models/task.js";
-import type { AuthenticatedRequest } from "../types/models/auth.js";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 export async function assignUserToTaskController(
-  req: AuthenticatedRequest<{ id: string }>,
+  req: Request<{ id: string }>,
   res: Response,
 ): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   try {
     const task_id = Number(req.params.id);
     const user_id = req.user.id;
@@ -28,9 +31,13 @@ export async function assignUserToTaskController(
 }
 
 export async function removeUserFromTaskController(
-  req: AuthenticatedRequest<{ id: string }>,
+  req: Request<{ id: string }>,
   res: Response,
 ): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   try {
     const task_id = Number(req.params.id);
     const user_id = req.user.id;

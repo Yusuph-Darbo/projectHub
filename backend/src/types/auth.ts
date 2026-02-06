@@ -1,19 +1,18 @@
 import type { Request } from "express";
 
-// Generic Express request with typed params/body and an authenticated `user`
-// injected by the requireAuth middleware.
-export interface AuthenticatedRequest<
+// Use Omit to remove the optional user, then add it back as required
+export type AuthenticatedRequest<
   Params = any,
   ResBody = any,
   ReqBody = any,
   ReqQuery = any,
-> extends Request<Params, ResBody, ReqBody, ReqQuery> {
+> = Omit<Request<Params, ResBody, ReqBody, ReqQuery>, "user"> & {
   user: {
     id: number;
     email: string;
     role: string;
   };
-}
+};
 
 export interface RegisterBody {
   name: string;

@@ -1,5 +1,5 @@
 import client from "../config/db.js";
-import type { CreateTask, Task } from "../types/models/task.js";
+import type { CreateTask, Task } from "../types/task.js";
 
 // Can only update title, description and / or status
 type TaskUpdates = Partial<

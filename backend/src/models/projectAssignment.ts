@@ -1,5 +1,5 @@
 import client from "../config/db.js";
-import type { ProjectAssignment } from "../types/models/projectAssignment.js";
+import type { ProjectAssignment } from "../types/projectAssignment.js";
 
 type PublicUser = {
   user_id: number;

@@ -4,7 +4,7 @@ import type {
   Project,
   ProjectWithOwner,
   ProjectTask,
-} from "../types/models/project.js";
+} from "../types/project.js";
 
 // Updates are optional and cannot update user_id and created_at
 type ProjectUpdates = Partial<

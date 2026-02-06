@@ -8,15 +8,19 @@ import {
   getOwnerOfProject,
 } from "../models/project.js";
 import { addUserToProject } from "../models/projectAssignment.js";
-import type { Response } from "express";
-import type { AuthenticatedRequest } from "../types/models/auth.js";
-import type { Project } from "../types/models/project.js";
+import type { Request, Response } from "express";
+import type { Project } from "../types/project.js";
 
 export async function createProjectController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {
+    if (!req.user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
     const userId = req.user.id;
     const { name, description } = req.body;
 
@@ -36,9 +40,14 @@ export async function createProjectController(
 }
 
 export async function getMyProjectsController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
   try {
     const userId = req.user.id;
     const project = await getProjectByUser(userId);
@@ -50,7 +59,7 @@ export async function getMyProjectsController(
 }
 
 export async function getAllTasksController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {
@@ -70,7 +79,7 @@ export async function getAllTasksController(
 }
 
 export async function getProjectByIdController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {
@@ -95,7 +104,7 @@ export async function getProjectByIdController(
 }
 
 export async function updateProjectController(
-  req: AuthenticatedRequest<{ id: string }, any, Project>,
+  req: Request<{ id: string }, any, Project>,
   res: Response,
 ): Promise<void> {
   try {
@@ -124,7 +133,7 @@ export async function updateProjectController(
 }
 
 export async function deleteProjectController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {
@@ -149,7 +158,7 @@ export async function deleteProjectController(
 }
 
 export async function getOwnerOfProjectController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {
