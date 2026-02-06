@@ -1,11 +1,14 @@
 import { getUserById } from "../models/user.js";
-import type { AuthenticatedRequest } from "../types/models/auth.js";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 export async function getUserByIdController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   // comes from requireAuth middleware
   const userId = req.user.id;
 

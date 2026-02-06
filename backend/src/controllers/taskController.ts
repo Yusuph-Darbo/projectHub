@@ -5,16 +5,20 @@ import {
   updateTaskStatus,
   deleteTask,
 } from "../models/task.js";
-import type { AuthenticatedRequest } from "../types/models/auth.js";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import type { CreateTask, Task } from "../types/models/task.js";
 
 export async function createTaskController(
-  req: AuthenticatedRequest<{ id: string }, any, CreateTask>,
+  req: Request<{ id: string }, any, CreateTask>,
   res: Response,
 ): Promise<void> {
   const { title, description } = req.body;
   const project_id = Number(req.params.id);
+
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   // comes from requireAuth middleware
   const userId = req.user.id;
 
@@ -33,10 +37,7 @@ export async function createTaskController(
 }
 
 // Gets individual task
-export async function getTask(
-  req: AuthenticatedRequest,
-  res: Response,
-): Promise<void> {
+export async function getTask(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params.id);
 
@@ -54,7 +55,7 @@ export async function getTask(
 }
 
 export async function updateTaskController(
-  req: AuthenticatedRequest<{ id: string }, any, Task>,
+  req: Request<{ id: string }, any, Task>,
   res: Response,
 ): Promise<void> {
   try {
@@ -75,7 +76,7 @@ export async function updateTaskController(
 }
 
 export async function updateTaskStatusController(
-  req: AuthenticatedRequest<{ id: string }, any, Task>,
+  req: Request<{ id: string }, any, Task>,
   res: Response,
 ): Promise<void> {
   try {
@@ -96,7 +97,7 @@ export async function updateTaskStatusController(
 }
 
 export async function deleteTaskController(
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
 ): Promise<void> {
   try {

@@ -5,11 +5,10 @@ import {
 } from "../models/projectAssignment.js";
 import { getUserByEmailForAssignment } from "../models/user.js";
 import { getProjectById } from "../models/project.js";
-import type { AuthenticatedRequest } from "../types/models/auth.js";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 
 export async function addUserToProjectController(
-  req: AuthenticatedRequest<{ id: string }>,
+  req: Request<{ id: string }>,
   res: Response,
 ): Promise<void> {
   try {
@@ -43,9 +42,13 @@ export async function addUserToProjectController(
 }
 
 export async function removeUserFromProjectController(
-  req: AuthenticatedRequest<{ id: string }>,
+  req: Request<{ id: string }>,
   res: Response,
 ): Promise<void> {
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   try {
     const project_id = Number(req.params.id);
     const user_id = req.user.id;
@@ -86,7 +89,7 @@ export async function removeUserFromProjectController(
 }
 
 export async function getAllMembersOfProjectController(
-  req: AuthenticatedRequest<{ id: string }>,
+  req: Request<{ id: string }>,
   res: Response,
 ): Promise<void> {
   try {
