@@ -1,0 +1,22 @@
+export interface CreateUser {
+  name: string;
+  email: string;
+  hashedPassword: string;
+  role: string;
+}
+
+export interface RegisterBody {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface LoginBody {
+  email: string;
+  password: string;
+}
+
+export interface AuthenticatedUser {
+  token: string;
+  User: { id: number; name: string; email: string };
+}
