@@ -1,5 +1,5 @@
 import client from "../config/db.js";
-import type { CreateUser, User, PublicUser } from "../types/models/user.js";
+import type { CreateUser, User, PublicUser } from "../types/user.js";
 
 // Updates are optional and cannot update user_id and created_at
 type UserUpdates = Partial<Omit<User, "user_id" | "created_at">>;

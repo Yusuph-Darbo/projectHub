@@ -1,9 +1,6 @@
 import client from "../config/db.js";
-import type {
-  TaskAssignment,
-  TaskSummary,
-} from "../types/models/taskAssignment.js";
-import type { PublicUser } from "../types/models/user.js";
+import type { TaskAssignment, TaskSummary } from "../types/taskAssignment.js";
+import type { PublicUser } from "../types/user.js";
 
 export async function assignUserToTask(
   user_id: number,

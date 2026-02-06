@@ -2,7 +2,7 @@ import { createUser, getUserByEmail } from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import type { Request, Response } from "express";
-import type { LoginBody, RegisterBody } from "../types/models/auth.js";
+import type { LoginBody, RegisterBody } from "../types/auth.js";
 
 export async function register(
   req: Request<{}, any, RegisterBody>,

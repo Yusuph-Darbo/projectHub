@@ -6,7 +6,7 @@ import {
   deleteTask,
 } from "../models/task.js";
 import type { Request, Response } from "express";
-import type { CreateTask, Task } from "../types/models/task.js";
+import type { CreateTask, Task } from "../types/task.js";
 
 export async function createTaskController(
   req: Request<{ id: string }, any, CreateTask>,

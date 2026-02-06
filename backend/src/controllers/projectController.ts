@@ -9,7 +9,7 @@ import {
 } from "../models/project.js";
 import { addUserToProject } from "../models/projectAssignment.js";
 import type { Request, Response } from "express";
-import type { Project } from "../types/models/project.js";
+import type { Project } from "../types/project.js";
 
 export async function createProjectController(
   req: Request,
