@@ -40,6 +40,10 @@ export async function apiRequest<T>(
     const response = await fetch(url, config);
     const data = (await response.json()) as T;
 
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
     if (!response.ok) {
       throw new Error(
         (data as any)?.error ?? `HTTP error! status: ${response.status}`,
@@ -71,7 +75,7 @@ export async function loginUser(
 }
 
 // Don't need to explicitly state method as its GET by default
-export async function getMe(): Promise<RegisterBody> {
+export async function getMe(): Promise<AuthenticatedUser> {
   return apiRequest("/user/me");
 }
 
@@ -162,14 +166,14 @@ export async function assignUserToProject(
 
 export async function getMembersOfProject(
   project_id: number,
-): Promise<Project> {
+): Promise<Project[]> {
   return apiRequest(`/projects/${project_id}`);
 }
 
 export async function removeUserFromProject(
   project_id: number,
   user_id: number,
-): Promise<TaskAssignment> {
+): Promise<ProjectAssignment> {
   return apiRequest(`/projects/${project_id}/unassign`, {
     method: "DELETE",
     body: JSON.stringify({ user_id }),
@@ -189,7 +193,7 @@ export async function assignUserToTask(
 export async function removeUserFromTask(
   task_id: number,
   user_id: number,
-): Promise<Task> {
+): Promise<TaskAssignment> {
   return apiRequest(`/task-assignment/${task_id}/unassign`, {
     method: "DELETE",
     body: JSON.stringify({ user_id }),

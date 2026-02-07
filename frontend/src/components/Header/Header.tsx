@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getMe } from "../../utils/api.js";
 import { logOut } from "../../utils/auth.js";
 import { isAuthenticated } from "../../utils/auth.js";
+import type { AuthenticatedUser } from "../../types/user.js";
 
 import {
   DropdownMenu,
@@ -10,15 +11,19 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu.jsx";
+} from "../ui/dropdown-menu.js";
 
 import "./Header.css";
 
-export default function Header({ title }) {
+type HeaderProps = {
+  title: string;
+};
+
+export default function Header({ title }: HeaderProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<AuthenticatedUser | null>(null);
 
   // Used to run logic after header is rendered
   useEffect(() => {
@@ -45,6 +50,7 @@ export default function Header({ title }) {
 
   const isDashboard = pathname.startsWith("/dashboard/");
   const isRegister = pathname.startsWith("/register");
+  const userInitial = user?.name?.[0]?.toUpperCase() ?? "?";
 
   return (
     <header>
@@ -60,9 +66,7 @@ export default function Header({ title }) {
         {!isRegister && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="profile-icon">
-                {user ? user.name[0].toUpperCase() : "?"}
-              </button>
+              <button className="profile-icon">{userInitial}</button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="start">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>

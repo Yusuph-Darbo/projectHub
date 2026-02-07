@@ -18,5 +18,7 @@ export interface LoginBody {
 
 export interface AuthenticatedUser {
   token: string;
-  User: { id: number; name: string; email: string };
+  id: number;
+  name: string;
+  email: string;
 }

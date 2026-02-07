@@ -1,16 +1,21 @@
+import type { ComponentProps } from "react";
 import {
   CircleCheckIcon,
   InfoIcon,
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-} from "lucide-react"
+} from "lucide-react";
 import { Toaster as Sonner } from "sonner";
 
-const Toaster = ({
-  theme = "light",
-  ...props
-}) => {
+type Theme = "light" | "dark" | "system";
+
+// 🔹 Inherit all Sonner props
+type ToasterProps = ComponentProps<typeof Sonner> & {
+  theme?: Theme;
+};
+
+const Toaster = ({ theme = "light", ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme}
@@ -27,11 +32,12 @@ const Toaster = ({
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)"
-        }
+          "--border-radius": "var(--radius)",
+        } as React.CSSProperties
       }
-      {...props} />
+      {...props}
+    />
   );
-}
+};
 
-export { Toaster }
+export { Toaster };
