@@ -20,10 +20,12 @@ export default function Register() {
     confirmPassword: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  function handleChange(event) {
+  function handleChange(
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
     setFormData({
       ...formData,
       [event.target.name]: event.target.value,
@@ -32,7 +34,7 @@ export default function Register() {
     if (error) setError("");
   }
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setLoading(true);
@@ -59,7 +61,7 @@ export default function Register() {
         navigate("/");
       } else {
         // Register
-        const response = await registerUser({
+        await registerUser({
           name: formData.fullName,
           email: formData.email,
           password: formData.password,
@@ -78,7 +80,11 @@ export default function Register() {
         navigate("/");
       }
     } catch (err) {
-      setError(err.message || "An error occurred. Please try again.");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -185,8 +191,8 @@ export default function Register() {
                 ? "Signing in..."
                 : "Creating account..."
               : isLogin
-              ? "Sign In"
-              : "Sign Up"}
+                ? "Sign In"
+                : "Sign Up"}
           </button>
         </form>
 

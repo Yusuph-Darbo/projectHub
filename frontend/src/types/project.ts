@@ -3,7 +3,7 @@ export interface Project {
   name: string;
   description: string;
   owner_id: number;
-  owner_name?: string; // 👈 optional
+  owner_name?: string;
   created_at: Date;
 }
 

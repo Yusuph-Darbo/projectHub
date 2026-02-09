@@ -7,6 +7,7 @@ import type {
   RegisterBody,
   LoginBody,
   AuthenticatedUser,
+  AuthResponse,
 } from "../types/user.js";
 
 const API_BASE_URL =
@@ -65,9 +66,7 @@ export async function registerUser(
   });
 }
 
-export async function loginUser(
-  credentials: LoginBody,
-): Promise<AuthenticatedUser> {
+export async function loginUser(credentials: LoginBody): Promise<AuthResponse> {
   return apiRequest("/auth/login", {
     method: "POST",
     body: JSON.stringify(credentials),

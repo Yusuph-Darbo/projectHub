@@ -22,3 +22,8 @@ export interface AuthenticatedUser {
   name: string;
   email: string;
 }
+
+export interface AuthResponse {
+  token: string;
+  user: AuthenticatedUser;
+}
