@@ -1,3 +1,5 @@
+import type { AuthenticatedUser } from "../types/user.js";
+
 export async function logOut() {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
@@ -9,7 +11,7 @@ export function isAuthenticated() {
   return !!token;
 }
 
-export function getCurrentUser() {
+export function getCurrentUser(): AuthenticatedUser | null {
   const userStr = localStorage.getItem("user");
   if (!userStr) return null;
 

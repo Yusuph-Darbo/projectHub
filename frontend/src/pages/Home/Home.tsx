@@ -25,19 +25,21 @@ import { createProject } from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getCurrentUser, isAuthenticated } from "../../utils/auth.js";
+import type { Project } from "../../types/project.js";
 
 export default function Home() {
+  type CardMode = "create" | "edit" | null;
   // Form states
-  const [projectName, setProjectName] = useState("");
-  const [projectDescription, setProjectDescription] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [cardMode, setCardMode] = useState(null);
-  const [activeProject, setActiveProject] = useState(null);
+  const [projectName, setProjectName] = useState<string>("");
+  const [projectDescription, setProjectDescription] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [cardMode, setCardMode] = useState<CardMode>(null);
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
 
   const navigate = useNavigate();
 
   // Projects for user from db
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const currentUser = getCurrentUser();
 
   useEffect(() => {
@@ -46,7 +48,11 @@ export default function Home() {
         const data = await listProjects();
         setProjects(data);
       } catch (err) {
-        console.error("Failed to load projects", err.message);
+        if (err instanceof Error) {
+          console.error("Failed to load projects", err.message);
+        } else {
+          console.error("Failed to load projects", err);
+        }
       }
     }
 
@@ -73,7 +79,11 @@ export default function Home() {
 
       toast.success("Created project successfully");
     } catch (err) {
-      console.error("Failed to create project:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to create project", err.message);
+      } else {
+        console.error("Failed to create project", err);
+      }
       toast.error("Failed to create project");
     } finally {
       setIsLoading(false);
@@ -85,6 +95,8 @@ export default function Home() {
 
     try {
       setIsLoading(true);
+
+      if (!activeProject) return;
 
       const updatedProject = await editProject(activeProject.project_id, {
         name: projectName,
@@ -102,7 +114,11 @@ export default function Home() {
 
       toast.success("Updated project successfully");
     } catch (err) {
-      console.error("Failed to edit project:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to edit projects", err.message);
+      } else {
+        console.error("Failed to edit projects", err);
+      }
       toast.error("Failed to update project");
     } finally {
       setIsLoading(false);
@@ -113,6 +129,8 @@ export default function Home() {
   async function handleDeleteProject() {
     try {
       setIsLoading(true);
+
+      if (!activeProject) return;
 
       await deleteProject(activeProject.project_id);
 
@@ -125,7 +143,11 @@ export default function Home() {
 
       toast.success("Deleted project successfully");
     } catch (err) {
-      console.error("Failed to delete project:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to delete project", err.message);
+      } else {
+        console.error("Failed to delete projects", err);
+      }
       toast.error("Failed to delete project");
     } finally {
       setIsLoading(false);
@@ -139,7 +161,7 @@ export default function Home() {
     setProjectDescription("");
   }
 
-  function editCard(project) {
+  function editCard(project: Project) {
     setCardMode("edit");
     setActiveProject(project);
     setProjectName(project.name);
@@ -259,7 +281,7 @@ export default function Home() {
                   id="project-description"
                   placeholder="Enter project description"
                   className="form-textarea"
-                  rows="4"
+                  rows={4}
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
                 />
