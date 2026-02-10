@@ -30,6 +30,8 @@ import {
   useSensors,
   useDroppable,
   DragOverlay,
+  type DragStartEvent,
+  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -42,13 +44,18 @@ import { FaPlus } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
-import type { Task } from "../../types/task.js";
+import type { Task, KanbanTask, KanbanColumn } from "../../types/task.js";
 import type { ProjectOwner } from "../../types/project.js";
 import type { PublicUser } from "../../types/user.js";
+import type { ReactNode } from "react";
 
 export default function Kanban() {
   type CardMode = "create" | "edit" | "memberCreate" | null;
   type Status = "To Do" | "In Progress" | "Done";
+  interface DroppableColumnProps {
+    column: KanbanColumn;
+    children: ReactNode;
+  }
   // Has 3 modes = null || "create" || "edit" || "memberCreate"
   const [cardMode, setCardMode] = useState<CardMode>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
@@ -169,9 +176,9 @@ export default function Kanban() {
   };
 
   function formatKanbanColumns(tasks: Task[]) {
-    const columns = Object.values(columnConfig).map((col) => ({
+    const columns: KanbanColumn[] = Object.values(columnConfig).map((col) => ({
       ...col,
-      tasks: [],
+      tasks: [] as KanbanTask[],
       count: 0,
     }));
 
@@ -189,9 +196,10 @@ export default function Kanban() {
           assigned_to: task.assigned_to,
           // Derived display fields
           createdByLabel: userMap[task.created_by] ?? "Unknown user",
-          assignedToLabel: task.assigned_to
-            ? userMap[task.assigned_to]
-            : "Unassigned",
+          assignedToLabel:
+            task.assigned_to !== null
+              ? (userMap[task.assigned_to] ?? "Unknown user")
+              : "Unassigned",
           statusColor: column.statusColor,
           statusTextColor: column.statusTextColor,
         });
@@ -203,7 +211,7 @@ export default function Kanban() {
     return columns;
   }
 
-  function DroppableColumn({ column, children }) {
+  function DroppableColumn({ column, children }: DroppableColumnProps) {
     const { setNodeRef } = useDroppable({
       id: column.id,
       data: {
@@ -347,7 +355,11 @@ export default function Kanban() {
 
       toast.success("Created task successfully.");
     } catch (err) {
-      console.error("Failed to create task:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to create task:", err.message);
+      } else {
+        console.error("Failed to create task:", err);
+      }
       toast.error("Failed to create task");
     } finally {
       setIsLoading(false);
@@ -358,16 +370,22 @@ export default function Kanban() {
     try {
       setIsLoading(true);
 
-      await deleteTask(activeTask.id);
+      if (!activeTask) return;
+
+      await deleteTask(activeTask.task_id);
 
       // Filtering out the deleted task
-      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.id));
+      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.task_id));
 
       closeCard();
 
       toast.success("Successfully deleted task");
     } catch (err) {
-      console.error("Failed to delete task:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to delete task:", err.message);
+      } else {
+        console.error("Failed to delete task:", err);
+      }
       toast.error("Failed to delete task. Try again");
     } finally {
       setIsLoading(false);
@@ -390,14 +408,14 @@ export default function Kanban() {
       let updatedTask = activeTask;
 
       if (detailsChanged) {
-        updatedTask = await editTask(activeTask.id, {
+        updatedTask = await editTask(activeTask.task_id, {
           title,
           description,
         });
       }
 
       if (statusChanged) {
-        updatedTask = await editTaskStatus(activeTask.id, status);
+        updatedTask = await editTaskStatus(activeTask.task_id, status);
       }
 
       // Handle assignment/unassignment
@@ -405,30 +423,34 @@ export default function Kanban() {
       if (assignmentChanged) {
         if (assignee) {
           // Assign user to task
-          await handleTaskAssignment(activeTask.id, assignee);
+          await handleTaskAssignment(activeTask.task_id, assignee);
         } else if (activeTask.assigned_to) {
           // Unassign: remove current assignment
-          await removeUserFromTask(activeTask.id, activeTask.assigned_to);
+          await removeUserFromTask(activeTask.task_id, activeTask.assigned_to);
           const updatedTasks = await getProjectTasks(projectId);
           setTasks(updatedTasks);
         }
       } else {
         // Only update task list if assignment didn't change
         setTasks((prev) =>
-          prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
+          prev.map((t) => (t.task_id === activeTask.task_id ? updatedTask : t)),
         );
       }
 
       closeCard();
     } catch (err) {
-      console.error("Failed to edit task:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to edit task:", err.message);
+      } else {
+        console.error("Failed to edit task:", err);
+      }
       toast.error("Failed to edit task");
     } finally {
       setIsLoading(false);
     }
   }
 
-  function handleDragStart(event) {
+  function handleDragStart(event: DragStartEvent) {
     const { active } = event;
 
     // Find all tasks across all columns
@@ -440,7 +462,7 @@ export default function Kanban() {
     }
   }
 
-  function handleDragEnd(event) {
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
     setActiveDragTask(null); // Clear drag overlay
@@ -501,14 +523,18 @@ export default function Kanban() {
 
       toast.success("Member added successfully.");
     } catch (err) {
-      console.error("Failed to add member to project:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to add member to project:", err.message);
+      } else {
+        console.error("Failed to add member to project:", err);
+      }
       toast.error("Cannot find user.");
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleRemoveMember(user_id) {
+  async function handleRemoveMember(user_id: number) {
     try {
       setIsLoading(true);
 
@@ -518,14 +544,18 @@ export default function Kanban() {
 
       toast.success("Member removed successfully.");
     } catch (err) {
-      console.error("Failed to remove member from project:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to remove member from project:", err.message);
+      } else {
+        console.error("Failed to remove member from project:", err);
+      }
       toast.error("Failed to remove user from project");
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleTaskAssignment(task_id, user_id) {
+  async function handleTaskAssignment(task_id: number, user_id: number) {
     if (!user_id) return;
 
     try {
@@ -537,7 +567,11 @@ export default function Kanban() {
 
       toast.success("User assigned to task successfully");
     } catch (err) {
-      console.error("Failed to assign member to task:", err.message);
+      if (err instanceof Error) {
+        console.error("Failed to assign member to task:", err.message);
+      } else {
+        console.error("Failed to assign member to task:", err);
+      }
       toast.error("Failed to assign user to task");
       throw err; // Re-throw so handleUpdateTask can catch it
     }
@@ -555,7 +589,7 @@ export default function Kanban() {
     setAssignee("");
   }
 
-  function editCard(task) {
+  function editCard(task: Task) {
     setCardMode("edit");
     setActiveTask(task);
     setTitle(task.title);
@@ -755,7 +789,7 @@ export default function Kanban() {
                   id="task-description"
                   placeholder="Enter task description"
                   className="form-textarea"
-                  rows="4"
+                  rows={4}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
