@@ -8,7 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 export default defineConfig([
   globalIgnores(["dist"]),
 
-  // 🔹 Base JS config
+  // Base JS config
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     extends: [

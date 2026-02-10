@@ -42,24 +42,36 @@ import { FaPlus } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
+import type { Task } from "../../types/task.js";
+import type { ProjectOwner } from "../../types/project.js";
+import type { PublicUser } from "../../types/user.js";
 
 export default function Kanban() {
+  type CardMode = "create" | "edit" | "memberCreate" | null;
+  type Status = "To Do" | "In Progress" | "Done";
   // Has 3 modes = null || "create" || "edit" || "memberCreate"
-  const [cardMode, setCardMode] = useState(null);
-  const [activeTask, setActiveTask] = useState(null);
-  const [activeDragTask, setActiveDragTask] = useState(null); // For drag overlay
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("To Do");
-  const [isLoading, setIsLoading] = useState(false);
-  const [tasks, setTasks] = useState([]);
-  const [members, setMembers] = useState([]);
-  const [assignee, setAssignee] = useState("");
-  const [memberEmail, setMemberEmail] = useState("");
-  const [projectOwner, setProjectOwner] = useState(null);
+  const [cardMode, setCardMode] = useState<CardMode>(null);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeDragTask, setActiveDragTask] = useState<Task | null>(null); // For drag overlay
+  const [title, setTitle] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [status, setStatus] = useState<Status>("To Do");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [members, setMembers] = useState<PublicUser[]>([]);
+  const [assignee, setAssignee] = useState<string>("");
+  const [memberEmail, setMemberEmail] = useState<string>("");
+  const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
 
-  const { projectId } = useParams(); // grabs projectId from URL
   const currentUser = getCurrentUser();
+
+  const { projectIdNumber } = useParams<{ projectIdNumber: string }>(); // grabs projectId from URL
+
+  if (!projectIdNumber) {
+    throw new Error("projectId is missing");
+  }
+
+  const projectId = Number(projectIdNumber);
 
   // Configure sensors for drag and drop
   const sensors = useSensors(
@@ -82,7 +94,11 @@ export default function Kanban() {
         const data = await getProjectTasks(projectId);
         setTasks(data);
       } catch (err) {
-        console.error("Failed to fetch tasks:", err.message);
+        if (err instanceof Error) {
+          console.error("Failed to fetch tasks", err.message);
+        } else {
+          console.error("Failed to fetch tasks", err);
+        }
       }
     }
 
@@ -91,7 +107,7 @@ export default function Kanban() {
     async function fetchMembers() {
       try {
         const members = await getMembersOfProject(projectId);
-        setMembers(members);
+        setMembers([members]);
       } catch (err) {
         console.error("Failed to fetch members:", err);
       }
@@ -110,8 +126,8 @@ export default function Kanban() {
   }, [projectId]);
 
   // cache the result of a calculation between re-renders.
-  const userMap = useMemo(() => {
-    const map = {};
+  const userMap = useMemo((): Record<number, string> => {
+    const map: Record<number, string> = {};
 
     // Creating a dictionary / object between user_id and names
     members.forEach((m) => {
@@ -152,7 +168,7 @@ export default function Kanban() {
     },
   };
 
-  function formatKanbanColumns(tasks) {
+  function formatKanbanColumns(tasks: Task[]) {
     const columns = Object.values(columnConfig).map((col) => ({
       ...col,
       tasks: [],
