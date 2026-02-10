@@ -8,6 +8,7 @@ import type {
   LoginBody,
   AuthenticatedUser,
   AuthResponse,
+  PublicUser,
 } from "../types/user.js";
 
 const API_BASE_URL =
@@ -165,7 +166,7 @@ export async function assignUserToProject(
 
 export async function getMembersOfProject(
   project_id: number,
-): Promise<Project[]> {
+): Promise<PublicUser[]> {
   return apiRequest(`/projects/${project_id}`);
 }
 

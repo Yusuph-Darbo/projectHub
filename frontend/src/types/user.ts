@@ -27,3 +27,9 @@ export interface AuthResponse {
   token: string;
   user: AuthenticatedUser;
 }
+
+export interface PublicUser {
+  user_id: number;
+  name: string;
+  email: string;
+}
