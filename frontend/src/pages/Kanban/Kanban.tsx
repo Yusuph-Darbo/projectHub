@@ -44,41 +44,59 @@ import { FaPlus } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
-import type { Task, KanbanTask, KanbanColumn } from "../../types/task.js";
+import type { Task, EnrichedTask } from "../../types/task.js";
 import type { ProjectOwner } from "../../types/project.js";
-import type { PublicUser } from "../../types/user.js";
-import type { ReactNode } from "react";
+import type { Member } from "../../types/projectAssignment.js";
+
+type CardMode = null | "create" | "edit" | "memberCreate";
+
+interface ColumnConfig {
+  id: string;
+  title: string;
+  bgColor: string;
+  borderColor: string;
+  statusColor: string;
+  statusTextColor: string;
+}
+
+interface Column extends ColumnConfig {
+  tasks: EnrichedTask[];
+  count: number;
+}
+
+interface DroppableColumnProps {
+  column: Column;
+  children: React.ReactNode;
+}
+
+interface SortableTaskProps {
+  task: EnrichedTask;
+  borderColor: string;
+}
+
+interface TaskCardProps {
+  task: EnrichedTask;
+  borderColor: string;
+}
 
 export default function Kanban() {
-  type CardMode = "create" | "edit" | "memberCreate" | null;
-  type Status = "To Do" | "In Progress" | "Done";
-  interface DroppableColumnProps {
-    column: KanbanColumn;
-    children: ReactNode;
-  }
-  // Has 3 modes = null || "create" || "edit" || "memberCreate"
   const [cardMode, setCardMode] = useState<CardMode>(null);
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
-  const [activeDragTask, setActiveDragTask] = useState<Task | null>(null); // For drag overlay
+  const [activeTask, setActiveTask] = useState<EnrichedTask | null>(null);
+  const [activeDragTask, setActiveDragTask] = useState<EnrichedTask | null>(
+    null,
+  );
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [status, setStatus] = useState<Status>("To Do");
+  const [status, setStatus] = useState<string>("To Do");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [members, setMembers] = useState<PublicUser[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [assignee, setAssignee] = useState<string>("");
   const [memberEmail, setMemberEmail] = useState<string>("");
   const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
 
+  const { projectId } = useParams<{ projectId: string }>();
   const currentUser = getCurrentUser();
-
-  const { projectIdNumber } = useParams<{ projectIdNumber: string }>(); // grabs projectId from URL
-
-  if (!projectIdNumber) {
-    throw new Error("projectId is missing");
-  }
-
-  const projectId = Number(projectIdNumber);
 
   // Configure sensors for drag and drop
   const sensors = useSensors(
@@ -98,13 +116,11 @@ export default function Kanban() {
 
     async function fetchTasks() {
       try {
-        const data = await getProjectTasks(projectId);
+        const data = await getProjectTasks(Number(projectId));
         setTasks(data);
       } catch (err) {
         if (err instanceof Error) {
-          console.error("Failed to fetch tasks", err.message);
-        } else {
-          console.error("Failed to fetch tasks", err);
+          console.error("Failed to fetch tasks:", err.message);
         }
       }
     }
@@ -113,8 +129,8 @@ export default function Kanban() {
 
     async function fetchMembers() {
       try {
-        const members = await getMembersOfProject(projectId);
-        setMembers([members]);
+        const member = await getMembersOfProject(Number(projectId));
+        setMembers(member);
       } catch (err) {
         console.error("Failed to fetch members:", err);
       }
@@ -123,7 +139,7 @@ export default function Kanban() {
 
     async function fetchOwner() {
       try {
-        const owner = await getProjectOwner(projectId); // { user_id, name }
+        const owner = await getProjectOwner(Number(projectId));
         setProjectOwner(owner);
       } catch (err) {
         console.error("Failed to fetch project owner:", err);
@@ -133,7 +149,7 @@ export default function Kanban() {
   }, [projectId]);
 
   // cache the result of a calculation between re-renders.
-  const userMap = useMemo((): Record<number, string> => {
+  const userMap = useMemo(() => {
     const map: Record<number, string> = {};
 
     // Creating a dictionary / object between user_id and names
@@ -148,7 +164,7 @@ export default function Kanban() {
     return map;
   }, [members, projectOwner]);
 
-  const columnConfig = {
+  const columnConfig: Record<string, ColumnConfig> = {
     "To Do": {
       id: "todo",
       title: "To Do",
@@ -175,10 +191,10 @@ export default function Kanban() {
     },
   };
 
-  function formatKanbanColumns(tasks: Task[]) {
-    const columns: KanbanColumn[] = Object.values(columnConfig).map((col) => ({
+  function formatKanbanColumns(tasks: Task[]): Column[] {
+    const columns: Column[] = Object.values(columnConfig).map((col) => ({
       ...col,
-      tasks: [] as KanbanTask[],
+      tasks: [],
       count: 0,
     }));
 
@@ -193,11 +209,11 @@ export default function Kanban() {
           description: task.description,
           status: task.status,
           created_by: task.created_by,
-          assigned_to: task.assigned_to,
+          assigned_to: task.assigned_to ?? null,
           // Derived display fields
           createdByLabel: userMap[task.created_by] ?? "Unknown user",
           assignedToLabel:
-            task.assigned_to !== null
+            task.assigned_to !== null && task.assigned_to !== undefined
               ? (userMap[task.assigned_to] ?? "Unknown user")
               : "Unassigned",
           statusColor: column.statusColor,
@@ -234,7 +250,7 @@ export default function Kanban() {
     );
   }
 
-  function SortableTask({ task, borderColor }) {
+  function SortableTask({ task, borderColor }: SortableTaskProps) {
     const {
       attributes,
       listeners,
@@ -295,7 +311,7 @@ export default function Kanban() {
   }
 
   // Task card for the drag overlay
-  function TaskCard({ task, borderColor }) {
+  function TaskCard({ task, borderColor }: TaskCardProps) {
     return (
       <div className="task-card" style={{ cursor: "grabbing" }}>
         <div className="task-header">
@@ -333,19 +349,20 @@ export default function Kanban() {
   }
 
   async function handleCreateTask() {
-    if (!title.trim() || !description.trim()) return;
+    if (!title.trim() || !description.trim() || !projectId) return;
 
     try {
       setIsLoading(true);
 
-      const newTask = await createTask(projectId, {
+      const newTask = await createTask(Number(projectId), {
         title,
         description,
+        status: "To Do",
       });
 
       // If assignee is selected, assign user to the newly created task
       if (assignee) {
-        await handleTaskAssignment(newTask.task_id, assignee);
+        await handleTaskAssignment(newTask.task_id, Number(assignee));
       } else {
         // Just add the task to the list if no assignment
         setTasks((prev) => [newTask, ...prev]);
@@ -357,8 +374,6 @@ export default function Kanban() {
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to create task:", err.message);
-      } else {
-        console.error("Failed to create task:", err);
       }
       toast.error("Failed to create task");
     } finally {
@@ -367,15 +382,15 @@ export default function Kanban() {
   }
 
   async function handleDeleteTask() {
+    if (!activeTask) return;
+
     try {
       setIsLoading(true);
 
-      if (!activeTask) return;
-
-      await deleteTask(activeTask.task_id);
+      await deleteTask(activeTask.id);
 
       // Filtering out the deleted task
-      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.task_id));
+      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.id));
 
       closeCard();
 
@@ -383,8 +398,6 @@ export default function Kanban() {
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to delete task:", err.message);
-      } else {
-        console.error("Failed to delete task:", err);
       }
       toast.error("Failed to delete task. Try again");
     } finally {
@@ -393,7 +406,7 @@ export default function Kanban() {
   }
 
   async function handleUpdateTask() {
-    if (!activeTask) return;
+    if (!activeTask || !projectId) return;
 
     const detailsChanged =
       title !== activeTask.title || description !== activeTask.description;
@@ -405,35 +418,46 @@ export default function Kanban() {
     try {
       setIsLoading(true);
 
-      let updatedTask = activeTask;
+      let updatedTask: Task = {
+        task_id: activeTask.id,
+        project_id: Number(projectId),
+        created_by: activeTask.created_by,
+        title: activeTask.title,
+        description: activeTask.description,
+        status: activeTask.status,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
 
       if (detailsChanged) {
-        updatedTask = await editTask(activeTask.task_id, {
+        updatedTask = await editTask(activeTask.id, {
           title,
           description,
+          status: activeTask.status,
         });
       }
 
       if (statusChanged) {
-        updatedTask = await editTaskStatus(activeTask.task_id, status);
+        updatedTask = await editTaskStatus(activeTask.id, status);
       }
 
       // Handle assignment/unassignment
-      const assignmentChanged = assignee !== (activeTask.assigned_to ?? "");
+      const assignmentChanged =
+        assignee !== String(activeTask.assigned_to ?? "");
       if (assignmentChanged) {
         if (assignee) {
           // Assign user to task
-          await handleTaskAssignment(activeTask.task_id, assignee);
+          await handleTaskAssignment(activeTask.id, Number(assignee));
         } else if (activeTask.assigned_to) {
           // Unassign: remove current assignment
-          await removeUserFromTask(activeTask.task_id, activeTask.assigned_to);
-          const updatedTasks = await getProjectTasks(projectId);
+          await removeUserFromTask(activeTask.id, activeTask.assigned_to);
+          const updatedTasks = await getProjectTasks(Number(projectId));
           setTasks(updatedTasks);
         }
       } else {
         // Only update task list if assignment didn't change
         setTasks((prev) =>
-          prev.map((t) => (t.task_id === activeTask.task_id ? updatedTask : t)),
+          prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
         );
       }
 
@@ -441,8 +465,6 @@ export default function Kanban() {
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to edit task:", err.message);
-      } else {
-        console.error("Failed to edit task:", err);
       }
       toast.error("Failed to edit task");
     } finally {
@@ -467,12 +489,12 @@ export default function Kanban() {
 
     setActiveDragTask(null); // Clear drag overlay
 
-    if (!over) return;
+    if (!over || !projectId) return;
 
     const activeTask = tasks.find((t) => t.task_id === active.id);
     if (!activeTask) return;
 
-    let newStatus = null;
+    let newStatus: string | null = null;
 
     // Check if dropped on another task
     if (over.data?.current?.type !== "column") {
@@ -483,7 +505,7 @@ export default function Kanban() {
     }
     // Check if dropped on a column
     else if (over.data?.current?.type === "column") {
-      const targetStatus = over.data.current.status;
+      const targetStatus = over.data.current.status as string;
       if (activeTask.status !== targetStatus) {
         newStatus = targetStatus;
       }
@@ -493,7 +515,7 @@ export default function Kanban() {
     if (newStatus) {
       editTaskStatus(activeTask.task_id, newStatus)
         .then(async () => {
-          const updated = await getProjectTasks(projectId);
+          const updated = await getProjectTasks(Number(projectId));
           setTasks(updated);
           toast.success("Task status updated");
         })
@@ -506,16 +528,16 @@ export default function Kanban() {
   }
 
   async function handleAddMember() {
-    if (!memberEmail.trim()) return;
+    if (!memberEmail.trim() || !projectId) return;
 
     try {
       setIsLoading(true);
 
       // Assign user to project by email
-      await assignUserToProject(projectId, memberEmail);
+      await assignUserToProject(Number(projectId), memberEmail);
 
       // Re-fetch full member list so we get name, etc.
-      const updatedMembers = await getMembersOfProject(projectId);
+      const updatedMembers = await getMembersOfProject(Number(projectId));
       setMembers(updatedMembers);
 
       setMemberEmail("");
@@ -525,8 +547,6 @@ export default function Kanban() {
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to add member to project:", err.message);
-      } else {
-        console.error("Failed to add member to project:", err);
       }
       toast.error("Cannot find user.");
     } finally {
@@ -535,10 +555,12 @@ export default function Kanban() {
   }
 
   async function handleRemoveMember(user_id: number) {
+    if (!projectId) return;
+
     try {
       setIsLoading(true);
 
-      await removeUserFromProject(projectId, user_id);
+      await removeUserFromProject(Number(projectId), user_id);
 
       setMembers((prev) => prev.filter((m) => m.user_id !== user_id));
 
@@ -546,8 +568,6 @@ export default function Kanban() {
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to remove member from project:", err.message);
-      } else {
-        console.error("Failed to remove member from project:", err);
       }
       toast.error("Failed to remove user from project");
     } finally {
@@ -556,21 +576,19 @@ export default function Kanban() {
   }
 
   async function handleTaskAssignment(task_id: number, user_id: number) {
-    if (!user_id) return;
+    if (!user_id || !projectId) return;
 
     try {
       await assignUserToTask(task_id, user_id);
 
       // Refetch tasks to get updated assignment data
-      const updatedTasks = await getProjectTasks(projectId);
+      const updatedTasks = await getProjectTasks(Number(projectId));
       setTasks(updatedTasks);
 
       toast.success("User assigned to task successfully");
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to assign member to task:", err.message);
-      } else {
-        console.error("Failed to assign member to task:", err);
       }
       toast.error("Failed to assign user to task");
       throw err; // Re-throw so handleUpdateTask can catch it
@@ -589,14 +607,14 @@ export default function Kanban() {
     setAssignee("");
   }
 
-  function editCard(task: Task) {
+  function editCard(task: EnrichedTask) {
     setCardMode("edit");
     setActiveTask(task);
     setTitle(task.title);
     setDescription(task.description);
     setStatus(task.status);
     // Pre-select current assignee by user ID, or empty if unassigned
-    setAssignee(task.assigned_to ?? "");
+    setAssignee(String(task.assigned_to ?? ""));
   }
 
   function closeCard() {
@@ -612,9 +630,9 @@ export default function Kanban() {
   // When creating a form checking if the user has inputted text
   const isFormValid = title.trim().length > 0 && description.trim().length > 0;
   const isMemberFormValid = memberEmail.trim().length > 0;
-  const displayMembers = projectOwner
+  const displayMembers: Member[] = projectOwner
     ? [
-        projectOwner,
+        projectOwner as Member,
         ...members.filter((m) => m.user_id !== projectOwner.user_id),
       ]
     : members;
@@ -721,7 +739,7 @@ export default function Kanban() {
                     <RiDeleteBin2Line
                       className="bin-icon"
                       onClick={(e) => {
-                        e.stopPropagation(); // Prevent parent button click
+                        e.stopPropagation();
                         handleRemoveMember(member.user_id);
                       }}
                     />

@@ -166,7 +166,7 @@ export async function assignUserToProject(
 
 export async function getMembersOfProject(
   project_id: number,
-): Promise<PublicUser> {
+): Promise<PublicUser[]> {
   return apiRequest(`/projects/${project_id}`);
 }
 
