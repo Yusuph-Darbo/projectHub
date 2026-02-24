@@ -48,5 +48,40 @@ export async function TaskModal({
 }: TaskModalProps) {
   const isFormValid = title.trim().length > 0 && description.trim().length > 0;
 
-  return <></>;
+  return (
+    <>
+      <div className="modal-overlay" onClick={onClose}></div>
+      <Card className="create-task-card">
+        <Card className="create-task-card">
+          <CardHeader>
+            {mode === "create" ? (
+              <>
+                <CardTitle>Create New Task</CardTitle>
+                <CardDescription>
+                  Add a new task to your project. Give it a name and description
+                  to get started.
+                </CardDescription>
+              </>
+            ) : (
+              <>
+                <CardTitle>Edit Task</CardTitle>
+                <CardDescription>
+                  Update the task details below.
+                </CardDescription>
+              </>
+            )}
+            <CardAction>
+              <button
+                className="close-btn"
+                onClick={onClose}
+                aria-label="Close modal"
+              >
+                ×
+              </button>
+            </CardAction>
+          </CardHeader>
+        </Card>
+      </Card>
+    </>
+  );
 }
