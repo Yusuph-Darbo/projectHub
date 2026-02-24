@@ -28,3 +28,25 @@ interface TaskModalProps {
   onClose: () => void;
   isLoading: boolean;
 }
+
+export async function TaskModal({
+  mode,
+  task,
+  members,
+  title,
+  setTitle,
+  description,
+  setDescription,
+  status,
+  setStatus,
+  assignee,
+  setAssignee,
+  onSave,
+  onDelete,
+  onClose,
+  isLoading,
+}: TaskModalProps) {
+  const isFormValid = title.trim().length > 0 && description.trim().length > 0;
+
+  return <></>;
+}
