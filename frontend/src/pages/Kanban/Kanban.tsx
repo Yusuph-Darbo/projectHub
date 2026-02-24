@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "../../components/ui/card.jsx";
 import KanbanBoard from "./KanbanBoard.js";
+import TaskModal from "./TaskModal.js";
 import { toast } from "sonner";
 import { FaPlus } from "react-icons/fa";
 import { useEffect, useState, useMemo } from "react";
@@ -411,8 +412,6 @@ export default function Kanban() {
     setCardMode("memberCreate");
   }
 
-  // When creating a form checking if the user has inputted text
-  const isFormValid = title.trim().length > 0 && description.trim().length > 0;
   const isMemberFormValid = memberEmail.trim().length > 0;
   const displayMembers: Member[] = projectOwner
     ? [
@@ -501,126 +500,23 @@ export default function Kanban() {
       </div>
 
       {(cardMode === "create" || cardMode === "edit") && (
-        <>
-          <div className="modal-overlay" onClick={closeCard}></div>
-          <Card className="create-task-card">
-            <CardHeader>
-              {cardMode === "create" && (
-                <>
-                  <CardTitle>Create New Task</CardTitle>
-                  <CardDescription>
-                    Add a new task to your project. Give it a name and
-                    description to get started.
-                  </CardDescription>
-                </>
-              )}
-
-              {cardMode === "edit" && activeTask && (
-                <>
-                  <CardTitle>Edit Task</CardTitle>
-                  <CardDescription>
-                    Update the task details below.
-                  </CardDescription>
-                </>
-              )}
-
-              <CardAction>
-                <button
-                  className="close-btn"
-                  onClick={closeCard}
-                  aria-label="Close modal"
-                >
-                  ×
-                </button>
-              </CardAction>
-            </CardHeader>
-
-            <CardContent>
-              <div className="form-group">
-                <label htmlFor="task-name">Task Name</label>
-                <input
-                  type="text"
-                  id="task-name"
-                  placeholder="Enter task name"
-                  className="form-input"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="task-description">Description</label>
-                <textarea
-                  id="task-description"
-                  placeholder="Enter task description"
-                  className="form-textarea"
-                  rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              {cardMode === "edit" && (
-                <div className="form-group">
-                  <label htmlFor="task-status">Status</label>
-                  <select
-                    id="task-status"
-                    className="form-status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                  >
-                    <option value="To Do">To Do</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Done">Done</option>
-                  </select>
-
-                  <label htmlFor="task-assignment">Assign member to task</label>
-                  <select
-                    id="task-assignment"
-                    className="form-status"
-                    value={assignee}
-                    onChange={(e) => setAssignee(e.target.value)}
-                  >
-                    <option value="">Unassigned</option>
-
-                    {displayMembers.map((member) => (
-                      <option key={member.user_id} value={member.user_id}>
-                        {member.name}
-                        {currentUser?.id === member.user_id ? " (You)" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </CardContent>
-
-            <CardFooter>
-              {cardMode === "edit" && activeTask && (
-                <button className="btn-delete" onClick={handleDeleteTask}>
-                  Delete task
-                </button>
-              )}
-
-              <div>
-                <button className="btn-cancel" onClick={closeCard}>
-                  Cancel
-                </button>
-                <button
-                  className="btn-create"
-                  disabled={!isFormValid}
-                  onClick={
-                    cardMode === "edit" ? handleUpdateTask : handleCreateTask
-                  }
-                >
-                  {isLoading
-                    ? "Saving..."
-                    : cardMode === "edit"
-                      ? "Update Task"
-                      : "Create Task"}
-                </button>
-              </div>
-            </CardFooter>
-          </Card>
-        </>
+        <TaskModal
+          mode={cardMode}
+          task={activeTask}
+          members={displayMembers}
+          title={title}
+          setTitle={setTitle}
+          description={description}
+          setDescription={setDescription}
+          status={status}
+          setStatus={setStatus}
+          assignee={assignee}
+          setAssignee={setAssignee}
+          onSave={cardMode === "edit" ? handleUpdateTask : handleCreateTask}
+          onDelete={handleDeleteTask}
+          onClose={closeCard}
+          isLoading={isLoading}
+        />
       )}
 
       {cardMode === "memberCreate" && (

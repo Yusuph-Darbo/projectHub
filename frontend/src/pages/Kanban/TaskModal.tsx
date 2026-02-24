@@ -28,7 +28,7 @@ interface TaskModalProps {
   isLoading: boolean;
 }
 
-export async function TaskModal({
+export default function TaskModal({
   mode,
   task,
   members,
