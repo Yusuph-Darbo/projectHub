@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.jsx";
-import { FaPlus } from "react-icons/fa";
 import type { EnrichedTask } from "../../types/task.js";
 import type { Member } from "../../types/projectAssignment.js";
 
@@ -134,6 +133,30 @@ export async function TaskModal({
             </div>
           )}
         </CardContent>
+
+        <CardFooter>
+          {mode === "edit" && task && onDelete && (
+            <button className="btn-delete" onClick={onDelete}>
+              Delete task
+            </button>
+          )}
+          <div>
+            <button className="btn-cancel" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              className="btn-create"
+              disabled={!isFormValid}
+              onClick={onSave}
+            >
+              {isLoading
+                ? "Saving..."
+                : mode === "edit"
+                  ? "Update Task"
+                  : "Create Task"}
+            </button>
+          </div>
+        </CardFooter>
       </Card>
     </>
   );
