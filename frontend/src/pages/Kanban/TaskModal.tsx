@@ -52,35 +52,88 @@ export async function TaskModal({
     <>
       <div className="modal-overlay" onClick={onClose}></div>
       <Card className="create-task-card">
-        <Card className="create-task-card">
-          <CardHeader>
-            {mode === "create" ? (
-              <>
-                <CardTitle>Create New Task</CardTitle>
-                <CardDescription>
-                  Add a new task to your project. Give it a name and description
-                  to get started.
-                </CardDescription>
-              </>
-            ) : (
-              <>
-                <CardTitle>Edit Task</CardTitle>
-                <CardDescription>
-                  Update the task details below.
-                </CardDescription>
-              </>
-            )}
-            <CardAction>
-              <button
-                className="close-btn"
-                onClick={onClose}
-                aria-label="Close modal"
+        <CardHeader>
+          {mode === "create" ? (
+            <>
+              <CardTitle>Create New Task</CardTitle>
+              <CardDescription>
+                Add a new task to your project. Give it a name and description
+                to get started.
+              </CardDescription>
+            </>
+          ) : (
+            <>
+              <CardTitle>Edit Task</CardTitle>
+              <CardDescription>Update the task details below.</CardDescription>
+            </>
+          )}
+          <CardAction>
+            <button
+              className="close-btn"
+              onClick={onClose}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+          </CardAction>
+        </CardHeader>
+
+        <CardContent>
+          <div className="form-group">
+            <label htmlFor="task-name">Task Name</label>
+            <input
+              type="text"
+              id="task-name"
+              placeholder="Enter task name"
+              className="form-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="task-description">Description</label>
+            <textarea
+              id="task-description"
+              placeholder="Enter task description"
+              className="form-textarea"
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          {mode === "edit" && (
+            <div className="form-group">
+              <label htmlFor="task-status">Status</label>
+              <select
+                id="task-status"
+                className="form-status"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
               >
-                ×
-              </button>
-            </CardAction>
-          </CardHeader>
-        </Card>
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </select>
+
+              <label htmlFor="task-assignment">Assign member to task</label>
+              <select
+                id="task-assignment"
+                className="form-status"
+                value={assignee}
+                onChange={(e) => setAssignee(e.target.value)}
+              >
+                <option value="">Unassigned</option>
+                {members.map((member) => (
+                  <option key={member.user_id} value={member.user_id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </CardContent>
       </Card>
     </>
   );
