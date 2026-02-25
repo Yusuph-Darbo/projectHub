@@ -189,13 +189,7 @@ export default function Kanban() {
         status: "To Do",
       });
 
-      // If assignee is selected, assign user to the newly created task
-      if (assignee) {
-        await handleTaskAssignment(newTask.task_id, Number(assignee));
-      } else {
-        // Just add the task to the list if no assignment
-        setTasks((prev) => [newTask, ...prev]);
-      }
+      setTasks((prev) => [newTask, ...prev]);
 
       closeCard();
 
@@ -273,6 +267,7 @@ export default function Kanban() {
       // Handle assignment/unassignment
       const assignmentChanged =
         assignee !== String(activeTask.assigned_to ?? "");
+
       if (assignmentChanged) {
         if (assignee) {
           // Assign user to task

@@ -157,4 +157,104 @@ export default function useKanbanTasks(projectId: string) {
 
     return cols;
   }, [tasks, userMap]);
+
+  // Task actions
+  async function createNewTask(data: { title: string; description: string }) {
+    if (!projectId) return;
+
+    try {
+      setIsLoading(true);
+
+      const newTask = await createTask(Number(projectId), {
+        ...data,
+        status: "To Do",
+      });
+
+      setTasks((prev) => [newTask, ...prev]);
+      toast.success("Task created successfully");
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Failed to create task:", err.message);
+      }
+      toast.error("Failed to create task");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function updateExistingTask({
+    activeTask,
+    title,
+    description,
+    status,
+    assignee,
+  }: {
+    activeTask: EnrichedTask;
+    title: string;
+    description: string;
+    status: string;
+    assignee: string;
+  }) {
+    if (!projectId) return;
+    if (!title.trim() || !description.trim()) return;
+
+    try {
+      const detailsChanged =
+        title !== activeTask.title || description !== activeTask.description;
+
+      const statusChanged = status !== activeTask.status;
+
+      const assignmentChanged =
+        assignee !== String(activeTask.assigned_to ?? "");
+
+      let updatedTask: Task | null = null;
+
+      //  If details was changed
+      if (detailsChanged) {
+        updatedTask = await editTask(activeTask.id, {
+          title,
+          description,
+          status: activeTask.status,
+        });
+      }
+
+      // If status was changed
+      if (statusChanged) {
+        updatedTask = await editTaskStatus(activeTask.id, status);
+      }
+
+      // If assignment was changed
+      if (assignmentChanged) {
+        if (assignee) {
+          await assignUserToTask(activeTask.id, Number(assignee));
+        } else if (activeTask.assigned_to) {
+          await removeUserFromTask(activeTask.id, activeTask.assigned_to);
+          const updatedTasks = await getProjectTasks(Number(projectId));
+          setTasks(updatedTasks);
+        }
+
+        const refreshed = await getProjectTasks(Number(projectId));
+        setTasks(refreshed);
+
+        toast.success("Task updated");
+        return;
+      }
+
+      // Update local state if only details/status changed
+      if (updatedTask) {
+        setTasks((prev) =>
+          prev.map((t) => (t.task_id === activeTask.id ? updatedTask! : t)),
+        );
+      }
+
+      toast.success("Task updated");
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Failed to edit task:", err.message);
+      }
+      toast.error("Failed to edit task");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 }
