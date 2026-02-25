@@ -39,4 +39,42 @@ export default function useKanbanTasks(projectId: string) {
 
   const isOwner =
     currentUser && projectOwner && currentUser.id === projectOwner.user_id;
+
+  // Fetching
+  useEffect(() => {
+    if (!projectId) return;
+
+    async function fetchTasks() {
+      try {
+        const data = await getProjectTasks(Number(projectId));
+        setTasks(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          console.error("Failed to fetch tasks:", err.message);
+        }
+      }
+    }
+
+    fetchTasks();
+
+    async function fetchMembers() {
+      try {
+        const member = await getMembersOfProject(Number(projectId));
+        setMembers(member);
+      } catch (err) {
+        console.error("Failed to fetch members:", err);
+      }
+    }
+    fetchMembers();
+
+    async function fetchOwner() {
+      try {
+        const owner = await getProjectOwner(Number(projectId));
+        setProjectOwner(owner);
+      } catch (err) {
+        console.error("Failed to fetch project owner:", err);
+      }
+    }
+    fetchOwner();
+  }, [projectId]);
 }
