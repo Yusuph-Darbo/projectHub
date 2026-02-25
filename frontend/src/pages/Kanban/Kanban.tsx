@@ -44,9 +44,6 @@ interface Column extends ColumnConfig {
 export default function Kanban() {
   const [cardMode, setCardMode] = useState<CardMode>(null);
   const [activeTask, setActiveTask] = useState<EnrichedTask | null>(null);
-  // const [activeDragTask, setActiveDragTask] = useState<EnrichedTask | null>(
-  //   null,
-  // );
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [status, setStatus] = useState<string>("To Do");
