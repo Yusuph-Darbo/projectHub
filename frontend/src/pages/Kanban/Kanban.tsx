@@ -1,45 +1,17 @@
 import "./Kanban.css";
 import { RiDeleteBin2Line } from "react-icons/ri";
-import {
-  getProjectTasks,
-  createTask,
-  deleteTask,
-  editTask,
-  editTaskStatus,
-  getMembersOfProject,
-  assignUserToProject,
-  getProjectOwner,
-  removeUserFromProject,
-  assignUserToTask,
-  removeUserFromTask,
-} from "../../utils/api.js";
 import KanbanBoard from "./KanbanBoard.js";
 import TaskModal from "./TaskModal.js";
 import MemberModal from "./MemberModal.js";
-import { toast } from "sonner";
+import useKanbanTasks from "./Hooks/useKanbanTask.js";
 import { FaPlus } from "react-icons/fa";
-import { useEffect, useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
 import type { Task, EnrichedTask } from "../../types/task.js";
 import type { ProjectOwner } from "../../types/project.js";
-import type { Member } from "../../types/projectAssignment.js";
 
 type CardMode = null | "create" | "edit" | "memberCreate";
-
-interface ColumnConfig {
-  id: string;
-  title: string;
-  bgColor: string;
-  borderColor: string;
-  statusColor: string;
-  statusTextColor: string;
-}
-
-interface Column extends ColumnConfig {
-  tasks: EnrichedTask[];
-  count: number;
-}
 
 export default function Kanban() {
   const [cardMode, setCardMode] = useState<CardMode>(null);
@@ -47,325 +19,26 @@ export default function Kanban() {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [status, setStatus] = useState<string>("To Do");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
   const [assignee, setAssignee] = useState<string>("");
   const [memberEmail, setMemberEmail] = useState<string>("");
-  const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
 
   const { projectId } = useParams<{ projectId: string }>();
   const currentUser = getCurrentUser();
 
-  // Check if current user is the owner
-  const isOwner =
-    currentUser && projectOwner && currentUser.id === projectOwner.user_id;
-
-  useEffect(() => {
-    if (!projectId) return;
-
-    async function fetchTasks() {
-      try {
-        const data = await getProjectTasks(Number(projectId));
-        setTasks(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error("Failed to fetch tasks:", err.message);
-        }
-      }
-    }
-
-    fetchTasks();
-
-    async function fetchMembers() {
-      try {
-        const member = await getMembersOfProject(Number(projectId));
-        setMembers(member);
-      } catch (err) {
-        console.error("Failed to fetch members:", err);
-      }
-    }
-    fetchMembers();
-
-    async function fetchOwner() {
-      try {
-        const owner = await getProjectOwner(Number(projectId));
-        setProjectOwner(owner);
-      } catch (err) {
-        console.error("Failed to fetch project owner:", err);
-      }
-    }
-    fetchOwner();
-  }, [projectId]);
-
-  // cache the result of a calculation between re-renders.
-  const userMap = useMemo(() => {
-    const map: Record<number, string> = {};
-
-    // Creating a dictionary / object between user_id and names
-    members.forEach((m) => {
-      map[m.user_id] = m.name;
-    });
-
-    if (projectOwner) {
-      map[projectOwner.user_id] = projectOwner.name;
-    }
-
-    return map;
-  }, [members, projectOwner]);
-
-  const columnConfig: Record<string, ColumnConfig> = {
-    "To Do": {
-      id: "todo",
-      title: "To Do",
-      bgColor: "#F9FAFC",
-      borderColor: "#CAD5E2",
-      statusColor: "#F1F5F9",
-      statusTextColor: "#324158",
-    },
-    "In Progress": {
-      id: "in-progress",
-      title: "In Progress",
-      bgColor: "#EEF6FF",
-      borderColor: "#8EC5FF",
-      statusColor: "#DBEAFF",
-      statusTextColor: "#1447E5",
-    },
-    Done: {
-      id: "done",
-      title: "Done",
-      bgColor: "#F0FDF4",
-      borderColor: "#7AF1A8",
-      statusColor: "#DCFCE6",
-      statusTextColor: "#008236",
-    },
-  };
-
-  function formatKanbanColumns(tasks: Task[]): Column[] {
-    const columns: Column[] = Object.values(columnConfig).map((col) => ({
-      ...col,
-      tasks: [],
-      count: 0,
-    }));
-
-    tasks.forEach((task) => {
-      const column = columns.find((col) => col.title === task.status);
-
-      if (column) {
-        column.tasks.push({
-          id: task.task_id,
-          // Preserve original fields so we keep IDs
-          title: task.title,
-          description: task.description,
-          status: task.status,
-          created_by: task.created_by,
-          assigned_to: task.assigned_to ?? null,
-          // Derived display fields
-          createdByLabel: userMap[task.created_by] ?? "Unknown user",
-          assignedToLabel:
-            task.assigned_to !== null && task.assigned_to !== undefined
-              ? (userMap[task.assigned_to] ?? "Unknown user")
-              : "Unassigned",
-          statusColor: column.statusColor,
-          statusTextColor: column.statusTextColor,
-        });
-
-        column.count++;
-      }
-    });
-
-    return columns;
-  }
-
-  async function handleCreateTask() {
-    if (!title.trim() || !description.trim() || !projectId) return;
-
-    try {
-      setIsLoading(true);
-
-      const newTask = await createTask(Number(projectId), {
-        title,
-        description,
-        status: "To Do",
-      });
-
-      setTasks((prev) => [newTask, ...prev]);
-
-      closeCard();
-
-      toast.success("Created task successfully.");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to create task:", err.message);
-      }
-      toast.error("Failed to create task");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleDeleteTask() {
-    if (!activeTask) return;
-
-    try {
-      setIsLoading(true);
-
-      await deleteTask(activeTask.id);
-
-      // Filtering out the deleted task
-      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.id));
-
-      closeCard();
-
-      toast.success("Successfully deleted task");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to delete task:", err.message);
-      }
-      toast.error("Failed to delete task. Try again");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleUpdateTask() {
-    if (!activeTask || !projectId) return;
-
-    const detailsChanged =
-      title !== activeTask.title || description !== activeTask.description;
-
-    const statusChanged = status !== activeTask.status;
-
-    if (!title.trim() || !description.trim()) return;
-
-    try {
-      setIsLoading(true);
-
-      let updatedTask: Task = {
-        task_id: activeTask.id,
-        project_id: Number(projectId),
-        created_by: activeTask.created_by,
-        title: activeTask.title,
-        description: activeTask.description,
-        status: activeTask.status,
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
-
-      if (detailsChanged) {
-        updatedTask = await editTask(activeTask.id, {
-          title,
-          description,
-          status: activeTask.status,
-        });
-      }
-
-      if (statusChanged) {
-        updatedTask = await editTaskStatus(activeTask.id, status);
-      }
-
-      // Handle assignment/unassignment
-      const assignmentChanged =
-        assignee !== String(activeTask.assigned_to ?? "");
-
-      if (assignmentChanged) {
-        if (assignee) {
-          // Assign user to task
-          await handleTaskAssignment(activeTask.id, Number(assignee));
-        } else if (activeTask.assigned_to) {
-          // Unassign: remove current assignment
-          await removeUserFromTask(activeTask.id, activeTask.assigned_to);
-          const updatedTasks = await getProjectTasks(Number(projectId));
-          setTasks(updatedTasks);
-        }
-      } else {
-        // Only update task list if assignment didn't change
-        setTasks((prev) =>
-          prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
-        );
-      }
-
-      closeCard();
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to edit task:", err.message);
-      }
-      toast.error("Failed to edit task");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleAddMember() {
-    if (!memberEmail.trim() || !projectId) return;
-
-    try {
-      setIsLoading(true);
-
-      // Assign user to project by email
-      await assignUserToProject(Number(projectId), memberEmail);
-
-      // Re-fetch full member list so we get name, etc.
-      const updatedMembers = await getMembersOfProject(Number(projectId));
-      setMembers(updatedMembers);
-
-      setMemberEmail("");
-      closeCard();
-
-      toast.success("Member added successfully.");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to add member to project:", err.message);
-      }
-      toast.error("Cannot find user.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleRemoveMember(user_id: number) {
-    if (!projectId) return;
-
-    try {
-      setIsLoading(true);
-
-      await removeUserFromProject(Number(projectId), user_id);
-
-      setMembers((prev) => prev.filter((m) => m.user_id !== user_id));
-
-      toast.success("Member removed successfully.");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to remove member from project:", err.message);
-      }
-      toast.error("Failed to remove user from project");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleTaskAssignment(task_id: number, user_id: number) {
-    if (!user_id || !projectId) return;
-
-    try {
-      await assignUserToTask(task_id, user_id);
-
-      // Refetch tasks to get updated assignment data
-      const updatedTasks = await getProjectTasks(Number(projectId));
-      setTasks(updatedTasks);
-
-      toast.success("User assigned to task successfully");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to assign member to task:", err.message);
-      }
-      toast.error("Failed to assign user to task");
-      throw err; // Re-throw so handleUpdateTask can catch it
-    }
-  }
-
-  // The data formatted
-  const columns = formatKanbanColumns(tasks);
+  const {
+    columns,
+    members,
+    displayMembers,
+    isOwner,
+    isLoading,
+    createNewTask,
+    updateExistingTask,
+    deleteExistingTask,
+    addNewMember,
+    removeMember,
+  } = useKanbanTasks(projectId ?? "");
 
   function createCard() {
     setCardMode("create");
@@ -395,13 +68,6 @@ export default function Kanban() {
     setMemberEmail("");
     setCardMode("memberCreate");
   }
-
-  const displayMembers: Member[] = projectOwner
-    ? [
-        projectOwner as Member,
-        ...members.filter((m) => m.user_id !== projectOwner.user_id),
-      ]
-    : members;
 
   return (
     <>
@@ -468,7 +134,7 @@ export default function Kanban() {
                       className="bin-icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveMember(member.user_id);
+                        removeMember(member.user_id);
                       }}
                     />
                   )}
@@ -495,8 +161,30 @@ export default function Kanban() {
           setStatus={setStatus}
           assignee={assignee}
           setAssignee={setAssignee}
-          onSave={cardMode === "edit" ? handleUpdateTask : handleCreateTask}
-          onDelete={handleDeleteTask}
+          onSave={() => {
+            if (cardMode === "edit" && activeTask) {
+              updateExistingTask({
+                activeTask,
+                title,
+                description,
+                status,
+                assignee,
+              });
+            } else {
+              createNewTask({
+                title,
+                description,
+              });
+            }
+
+            closeCard();
+          }}
+          onDelete={() => {
+            if (activeTask) {
+              deleteExistingTask(activeTask.id);
+              closeCard();
+            }
+          }}
           onClose={closeCard}
           isLoading={isLoading}
         />
@@ -506,7 +194,7 @@ export default function Kanban() {
         <MemberModal
           memberEmail={memberEmail}
           setMemberEmail={setMemberEmail}
-          onSave={handleAddMember}
+          onSave={() => addNewMember(memberEmail)}
           onClose={closeCard}
           isLoading={isLoading}
         />

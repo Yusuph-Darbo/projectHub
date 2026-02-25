@@ -16,7 +16,7 @@ interface MemberModalProps {
   isLoading: boolean;
 }
 
-export default function MemberModal({
+export default function memberModal({
   memberEmail,
   setMemberEmail,
   onSave,
