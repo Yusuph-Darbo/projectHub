@@ -257,4 +257,78 @@ export default function useKanbanTasks(projectId: string) {
       setIsLoading(false);
     }
   }
+
+  async function deleteExistingTask(taskId: number) {
+    try {
+      setIsLoading(true);
+      await deleteTask(taskId);
+      setTasks((prev) => prev.filter((t) => t.task_id !== taskId));
+      toast.success("Task deleted");
+    } catch {
+      toast.error("Failed to delete task");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function addNewMember(email: string) {
+    if (!projectId) return;
+
+    try {
+      setIsLoading(true);
+
+      // Assign user to project by email
+      await assignUserToProject(Number(projectId), email);
+
+      // Re-fetch full member list so we get name, etc.
+      const updatedMembers = await getMembersOfProject(Number(projectId));
+      setMembers(updatedMembers);
+
+      toast.success("Member added successfully.");
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Failed to add member to project:", err.message);
+      }
+      toast.error("Cannot find user.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function removeMember(userId: number) {
+    if (!projectId) return;
+
+    try {
+      setIsLoading(true);
+      await removeUserFromProject(Number(projectId), userId);
+      setMembers((prev) => prev.filter((m) => m.user_id !== userId));
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Failed to remove member from project:", err.message);
+      }
+      toast.error("Failed to remove member");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const displayMembers: Member[] = projectOwner
+    ? [
+        projectOwner as Member,
+        ...members.filter((m) => m.user_id !== projectOwner.user_id),
+      ]
+    : members;
+
+  return {
+    columns,
+    members,
+    displayMembers,
+    isOwner,
+    isLoading,
+    createNewTask,
+    updateExistingTask,
+    deleteExistingTask,
+    addNewMember,
+    removeMember,
+  };
 }
