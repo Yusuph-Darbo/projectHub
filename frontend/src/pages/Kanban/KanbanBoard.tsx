@@ -17,8 +17,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { useState } from "react";
-import { editTaskStatus, getProjectTasks } from "../../utils/api.js";
-import type { EnrichedTask, Task } from "../../types/task.js";
+import { editTaskStatus } from "../../utils/api.js";
+import type { EnrichedTask } from "../../types/task.js";
 
 interface ColumnConfig {
   id: string;
@@ -37,7 +37,7 @@ export interface Column extends ColumnConfig {
 interface KanbanBoardProps {
   columns: Column[];
   projectId: string;
-  onTasksUpdate: (tasks: Task[]) => void;
+  onTasksUpdate: () => void;
   onTaskClick: (task: EnrichedTask) => void;
 }
 
@@ -181,7 +181,6 @@ const columnBorderByStatus: Record<string, string> = {
 
 export default function KanbanBoard({
   columns,
-  projectId,
   onTasksUpdate,
   onTaskClick,
 }: KanbanBoardProps) {
@@ -232,11 +231,8 @@ export default function KanbanBoard({
 
     if (newStatus) {
       editTaskStatus(activeTask.id, newStatus)
-        .then(() => getProjectTasks(Number(projectId)))
-        .then((updated) => {
-          onTasksUpdate(updated);
-          toast.success("Task status updated");
-        })
+        .then(() => onTasksUpdate())
+        .then(() => toast.success("Task status updated"))
         .catch(() => toast.error("Failed to update task status"));
     }
   }

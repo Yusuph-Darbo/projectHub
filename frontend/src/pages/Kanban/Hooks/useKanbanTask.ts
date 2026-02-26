@@ -195,8 +195,8 @@ export default function useKanbanTasks(projectId: string) {
     status: string;
     assignee: string;
   }) {
-    if (!projectId) return;
-    if (!title.trim() || !description.trim()) return;
+    if (!projectId) return false;
+    if (!title.trim() || !description.trim()) return false;
 
     try {
       const detailsChanged =
@@ -229,33 +229,39 @@ export default function useKanbanTasks(projectId: string) {
           await assignUserToTask(activeTask.id, Number(assignee));
         } else if (activeTask.assigned_to) {
           await removeUserFromTask(activeTask.id, activeTask.assigned_to);
-          const updatedTasks = await getProjectTasks(Number(projectId));
-          setTasks(updatedTasks);
         }
-
-        const refreshed = await getProjectTasks(Number(projectId));
-        setTasks(refreshed);
-
-        toast.success("Task updated");
-        return;
       }
 
-      // Update local state if only details/status changed
-      if (updatedTask) {
-        setTasks((prev) =>
-          prev.map((t) => (t.task_id === activeTask.id ? updatedTask! : t)),
-        );
-      }
+      const refreshed = await getProjectTasks(Number(projectId));
+      setTasks(refreshed);
 
       toast.success("Task updated");
+      return true;
     } catch (err) {
       if (err instanceof Error) {
         console.error("Failed to edit task:", err.message);
       }
       toast.error("Failed to edit task");
+      return false;
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function updateTaskStatus(taskId: number, newStatus: string) {
+    try {
+      await editTaskStatus(taskId, newStatus);
+      const updated = await getProjectTasks(Number(projectId));
+      setTasks(updated);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function refreshTasks() {
+    const data = await getProjectTasks(Number(projectId));
+    setTasks(data);
   }
 
   async function deleteExistingTask(taskId: number) {
@@ -328,7 +334,9 @@ export default function useKanbanTasks(projectId: string) {
     createNewTask,
     updateExistingTask,
     deleteExistingTask,
+    updateTaskStatus,
     addNewMember,
     removeMember,
+    refreshTasks,
   };
 }

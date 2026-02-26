@@ -8,7 +8,7 @@ import { FaPlus } from "react-icons/fa";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
-import type { Task, EnrichedTask } from "../../types/task.js";
+import type { EnrichedTask } from "../../types/task.js";
 import type { ProjectOwner } from "../../types/project.js";
 
 type CardMode = null | "create" | "edit" | "memberCreate";
@@ -20,7 +20,6 @@ export default function Kanban() {
   const [description, setDescription] = useState<string>("");
   const [status, setStatus] = useState<string>("To Do");
   const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
   const [assignee, setAssignee] = useState<string>("");
   const [memberEmail, setMemberEmail] = useState<string>("");
 
@@ -38,6 +37,7 @@ export default function Kanban() {
     deleteExistingTask,
     addNewMember,
     removeMember,
+    refreshTasks,
   } = useKanbanTasks(projectId ?? "");
 
   function createCard() {
@@ -93,7 +93,7 @@ export default function Kanban() {
       <KanbanBoard
         columns={columns}
         projectId={projectId!}
-        onTasksUpdate={setTasks}
+        onTasksUpdate={refreshTasks}
         onTaskClick={editCard}
       />
 
@@ -194,7 +194,10 @@ export default function Kanban() {
         <MemberModal
           memberEmail={memberEmail}
           setMemberEmail={setMemberEmail}
-          onSave={() => addNewMember(memberEmail)}
+          onSave={() => {
+            addNewMember(memberEmail);
+            closeCard();
+          }}
           onClose={closeCard}
           isLoading={isLoading}
         />
