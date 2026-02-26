@@ -15,7 +15,7 @@ export async function assignUserToTaskController(
   }
   try {
     const task_id = Number(req.params.id);
-    const user_id = req.user.id;
+    const user_id = req.body.user_id;
 
     if (Number.isNaN(task_id)) {
       res.status(400).json({ error: "Invalid task id" });

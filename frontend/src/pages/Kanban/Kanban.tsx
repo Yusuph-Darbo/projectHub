@@ -1,602 +1,44 @@
 import "./Kanban.css";
-import { AiOutlineHolder } from "react-icons/ai";
 import { RiDeleteBin2Line } from "react-icons/ri";
-import {
-  getProjectTasks,
-  createTask,
-  deleteTask,
-  editTask,
-  editTaskStatus,
-  getMembersOfProject,
-  assignUserToProject,
-  getProjectOwner,
-  removeUserFromProject,
-  assignUserToTask,
-  removeUserFromTask,
-} from "../../utils/api.js";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card.jsx";
-import {
-  DndContext,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  useDroppable,
-  DragOverlay,
-  type DragStartEvent,
-  type DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { toast } from "sonner";
+import KanbanBoard from "./KanbanBoard.js";
+import TaskModal from "./TaskModal.js";
+import MemberModal from "./MemberModal.js";
+import useKanbanTasks from "./Hooks/useKanbanTask.js";
 import { FaPlus } from "react-icons/fa";
-import { useEffect, useState, useMemo } from "react";
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
-import type { Task, EnrichedTask } from "../../types/task.js";
+import type { EnrichedTask } from "../../types/task.js";
 import type { ProjectOwner } from "../../types/project.js";
-import type { Member } from "../../types/projectAssignment.js";
 
 type CardMode = null | "create" | "edit" | "memberCreate";
-
-interface ColumnConfig {
-  id: string;
-  title: string;
-  bgColor: string;
-  borderColor: string;
-  statusColor: string;
-  statusTextColor: string;
-}
-
-interface Column extends ColumnConfig {
-  tasks: EnrichedTask[];
-  count: number;
-}
-
-interface DroppableColumnProps {
-  column: Column;
-  children: React.ReactNode;
-}
-
-interface SortableTaskProps {
-  task: EnrichedTask;
-  borderColor: string;
-}
-
-interface TaskCardProps {
-  task: EnrichedTask;
-  borderColor: string;
-}
 
 export default function Kanban() {
   const [cardMode, setCardMode] = useState<CardMode>(null);
   const [activeTask, setActiveTask] = useState<EnrichedTask | null>(null);
-  const [activeDragTask, setActiveDragTask] = useState<EnrichedTask | null>(
-    null,
-  );
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [status, setStatus] = useState<string>("To Do");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
+  const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
   const [assignee, setAssignee] = useState<string>("");
   const [memberEmail, setMemberEmail] = useState<string>("");
-  const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
 
   const { projectId } = useParams<{ projectId: string }>();
   const currentUser = getCurrentUser();
 
-  // Configure sensors for drag and drop
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // Require 8px of movement before drag starts
-      },
-    }),
-  );
-
-  // Check if current user is the owner
-  const isOwner =
-    currentUser && projectOwner && currentUser.id === projectOwner.user_id;
-
-  useEffect(() => {
-    if (!projectId) return;
-
-    async function fetchTasks() {
-      try {
-        const data = await getProjectTasks(Number(projectId));
-        setTasks(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error("Failed to fetch tasks:", err.message);
-        }
-      }
-    }
-
-    fetchTasks();
-
-    async function fetchMembers() {
-      try {
-        const member = await getMembersOfProject(Number(projectId));
-        setMembers(member);
-      } catch (err) {
-        console.error("Failed to fetch members:", err);
-      }
-    }
-    fetchMembers();
-
-    async function fetchOwner() {
-      try {
-        const owner = await getProjectOwner(Number(projectId));
-        setProjectOwner(owner);
-      } catch (err) {
-        console.error("Failed to fetch project owner:", err);
-      }
-    }
-    fetchOwner();
-  }, [projectId]);
-
-  // cache the result of a calculation between re-renders.
-  const userMap = useMemo(() => {
-    const map: Record<number, string> = {};
-
-    // Creating a dictionary / object between user_id and names
-    members.forEach((m) => {
-      map[m.user_id] = m.name;
-    });
-
-    if (projectOwner) {
-      map[projectOwner.user_id] = projectOwner.name;
-    }
-
-    return map;
-  }, [members, projectOwner]);
-
-  const columnConfig: Record<string, ColumnConfig> = {
-    "To Do": {
-      id: "todo",
-      title: "To Do",
-      bgColor: "#F9FAFC",
-      borderColor: "#CAD5E2",
-      statusColor: "#F1F5F9",
-      statusTextColor: "#324158",
-    },
-    "In Progress": {
-      id: "in-progress",
-      title: "In Progress",
-      bgColor: "#EEF6FF",
-      borderColor: "#8EC5FF",
-      statusColor: "#DBEAFF",
-      statusTextColor: "#1447E5",
-    },
-    Done: {
-      id: "done",
-      title: "Done",
-      bgColor: "#F0FDF4",
-      borderColor: "#7AF1A8",
-      statusColor: "#DCFCE6",
-      statusTextColor: "#008236",
-    },
-  };
-
-  function formatKanbanColumns(tasks: Task[]): Column[] {
-    const columns: Column[] = Object.values(columnConfig).map((col) => ({
-      ...col,
-      tasks: [],
-      count: 0,
-    }));
-
-    tasks.forEach((task) => {
-      const column = columns.find((col) => col.title === task.status);
-
-      if (column) {
-        column.tasks.push({
-          id: task.task_id,
-          // Preserve original fields so we keep IDs
-          title: task.title,
-          description: task.description,
-          status: task.status,
-          created_by: task.created_by,
-          assigned_to: task.assigned_to ?? null,
-          // Derived display fields
-          createdByLabel: userMap[task.created_by] ?? "Unknown user",
-          assignedToLabel:
-            task.assigned_to !== null && task.assigned_to !== undefined
-              ? (userMap[task.assigned_to] ?? "Unknown user")
-              : "Unassigned",
-          statusColor: column.statusColor,
-          statusTextColor: column.statusTextColor,
-        });
-
-        column.count++;
-      }
-    });
-
-    return columns;
-  }
-
-  function DroppableColumn({ column, children }: DroppableColumnProps) {
-    const { setNodeRef } = useDroppable({
-      id: column.id,
-      data: {
-        type: "column",
-        status: column.title,
-      },
-    });
-
-    return (
-      <div
-        ref={setNodeRef}
-        className="kanban-column"
-        style={{
-          backgroundColor: column.bgColor,
-          border: `2px solid ${column.borderColor}`,
-        }}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  function SortableTask({ task, borderColor }: SortableTaskProps) {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-      isDragging,
-    } = useSortable({ id: task.id });
-
-    const style = {
-      transform: CSS.Transform.toString(transform),
-      transition,
-      opacity: isDragging ? 0.5 : 1,
-    };
-
-    return (
-      <button
-        key={task.id}
-        className="task-card"
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        onClick={() => editCard(task)}
-      >
-        <div className="task-header">
-          <AiOutlineHolder className="task-icon" />
-          <h3 className="task-title">{task.title}</h3>
-        </div>
-
-        <p className="task-description">{task.description}</p>
-
-        <div className="task-footer">
-          <div className="task-status-row">
-            <span
-              className="task-status"
-              style={{
-                backgroundColor: task.statusColor,
-                color: task.statusTextColor,
-                border: `1px solid ${borderColor}`,
-              }}
-            >
-              {task.status}
-            </span>
-          </div>
-
-          <div className="task-meta">
-            <p>Created by: {task.createdByLabel}</p>
-            {task.assignedToLabel !== "Unassigned" && (
-              <p className="task-assignee">
-                Assigned to: {task.assignedToLabel}
-              </p>
-            )}
-          </div>
-        </div>
-      </button>
-    );
-  }
-
-  // Task card for the drag overlay
-  function TaskCard({ task, borderColor }: TaskCardProps) {
-    return (
-      <div className="task-card" style={{ cursor: "grabbing" }}>
-        <div className="task-header">
-          <AiOutlineHolder className="task-icon" />
-          <h3 className="task-title">{task.title}</h3>
-        </div>
-
-        <p className="task-description">{task.description}</p>
-
-        <div className="task-footer">
-          <div className="task-status-row">
-            <span
-              className="task-status"
-              style={{
-                backgroundColor: task.statusColor,
-                color: task.statusTextColor,
-                border: `1px solid ${borderColor}`,
-              }}
-            >
-              {task.status}
-            </span>
-          </div>
-
-          <div className="task-meta">
-            <p>Created by: {task.createdByLabel}</p>
-            {task.assignedToLabel !== "Unassigned" && (
-              <p className="task-assignee">
-                Assigned to: {task.assignedToLabel}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  async function handleCreateTask() {
-    if (!title.trim() || !description.trim() || !projectId) return;
-
-    try {
-      setIsLoading(true);
-
-      const newTask = await createTask(Number(projectId), {
-        title,
-        description,
-        status: "To Do",
-      });
-
-      // If assignee is selected, assign user to the newly created task
-      if (assignee) {
-        await handleTaskAssignment(newTask.task_id, Number(assignee));
-      } else {
-        // Just add the task to the list if no assignment
-        setTasks((prev) => [newTask, ...prev]);
-      }
-
-      closeCard();
-
-      toast.success("Created task successfully.");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to create task:", err.message);
-      }
-      toast.error("Failed to create task");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleDeleteTask() {
-    if (!activeTask) return;
-
-    try {
-      setIsLoading(true);
-
-      await deleteTask(activeTask.id);
-
-      // Filtering out the deleted task
-      setTasks((prev) => prev.filter((t) => t.task_id !== activeTask.id));
-
-      closeCard();
-
-      toast.success("Successfully deleted task");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to delete task:", err.message);
-      }
-      toast.error("Failed to delete task. Try again");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleUpdateTask() {
-    if (!activeTask || !projectId) return;
-
-    const detailsChanged =
-      title !== activeTask.title || description !== activeTask.description;
-
-    const statusChanged = status !== activeTask.status;
-
-    if (!title.trim() || !description.trim()) return;
-
-    try {
-      setIsLoading(true);
-
-      let updatedTask: Task = {
-        task_id: activeTask.id,
-        project_id: Number(projectId),
-        created_by: activeTask.created_by,
-        title: activeTask.title,
-        description: activeTask.description,
-        status: activeTask.status,
-        created_at: new Date(),
-        updated_at: new Date(),
-      };
-
-      if (detailsChanged) {
-        updatedTask = await editTask(activeTask.id, {
-          title,
-          description,
-          status: activeTask.status,
-        });
-      }
-
-      if (statusChanged) {
-        updatedTask = await editTaskStatus(activeTask.id, status);
-      }
-
-      // Handle assignment/unassignment
-      const assignmentChanged =
-        assignee !== String(activeTask.assigned_to ?? "");
-      if (assignmentChanged) {
-        if (assignee) {
-          // Assign user to task
-          await handleTaskAssignment(activeTask.id, Number(assignee));
-        } else if (activeTask.assigned_to) {
-          // Unassign: remove current assignment
-          await removeUserFromTask(activeTask.id, activeTask.assigned_to);
-          const updatedTasks = await getProjectTasks(Number(projectId));
-          setTasks(updatedTasks);
-        }
-      } else {
-        // Only update task list if assignment didn't change
-        setTasks((prev) =>
-          prev.map((t) => (t.task_id === activeTask.id ? updatedTask : t)),
-        );
-      }
-
-      closeCard();
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to edit task:", err.message);
-      }
-      toast.error("Failed to edit task");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  function handleDragStart(event: DragStartEvent) {
-    const { active } = event;
-
-    // Find all tasks across all columns
-    const allTasks = columns.flatMap((col) => col.tasks);
-    const draggedTask = allTasks.find((t) => t.id === active.id);
-
-    if (draggedTask) {
-      setActiveDragTask(draggedTask);
-    }
-  }
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-
-    setActiveDragTask(null); // Clear drag overlay
-
-    if (!over || !projectId) return;
-
-    const activeTask = tasks.find((t) => t.task_id === active.id);
-    if (!activeTask) return;
-
-    let newStatus: string | null = null;
-
-    // Check if dropped on another task
-    if (over.data?.current?.type !== "column") {
-      const overTask = tasks.find((t) => t.task_id === over.id);
-      if (overTask && activeTask.status !== overTask.status) {
-        newStatus = overTask.status;
-      }
-    }
-    // Check if dropped on a column
-    else if (over.data?.current?.type === "column") {
-      const targetStatus = over.data.current.status as string;
-      if (activeTask.status !== targetStatus) {
-        newStatus = targetStatus;
-      }
-    }
-
-    // Update status if it changed
-    if (newStatus) {
-      editTaskStatus(activeTask.task_id, newStatus)
-        .then(async () => {
-          const updated = await getProjectTasks(Number(projectId));
-          setTasks(updated);
-          toast.success("Task status updated");
-        })
-        .catch(() => toast.error("Failed to update task status"));
-    }
-  }
-
-  function handleDragCancel() {
-    setActiveDragTask(null);
-  }
-
-  async function handleAddMember() {
-    if (!memberEmail.trim() || !projectId) return;
-
-    try {
-      setIsLoading(true);
-
-      // Assign user to project by email
-      await assignUserToProject(Number(projectId), memberEmail);
-
-      // Re-fetch full member list so we get name, etc.
-      const updatedMembers = await getMembersOfProject(Number(projectId));
-      setMembers(updatedMembers);
-
-      setMemberEmail("");
-      closeCard();
-
-      toast.success("Member added successfully.");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to add member to project:", err.message);
-      }
-      toast.error("Cannot find user.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleRemoveMember(user_id: number) {
-    if (!projectId) return;
-
-    try {
-      setIsLoading(true);
-
-      await removeUserFromProject(Number(projectId), user_id);
-
-      setMembers((prev) => prev.filter((m) => m.user_id !== user_id));
-
-      toast.success("Member removed successfully.");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to remove member from project:", err.message);
-      }
-      toast.error("Failed to remove user from project");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function handleTaskAssignment(task_id: number, user_id: number) {
-    if (!user_id || !projectId) return;
-
-    try {
-      await assignUserToTask(task_id, user_id);
-
-      // Refetch tasks to get updated assignment data
-      const updatedTasks = await getProjectTasks(Number(projectId));
-      setTasks(updatedTasks);
-
-      toast.success("User assigned to task successfully");
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error("Failed to assign member to task:", err.message);
-      }
-      toast.error("Failed to assign user to task");
-      throw err; // Re-throw so handleUpdateTask can catch it
-    }
-  }
-
-  // The data formatted
-  const columns = formatKanbanColumns(tasks);
+  const {
+    columns,
+    members,
+    displayMembers,
+    isOwner,
+    isLoading,
+    createNewTask,
+    updateExistingTask,
+    deleteExistingTask,
+    addNewMember,
+    removeMember,
+    refreshTasks,
+  } = useKanbanTasks(projectId ?? "");
 
   function createCard() {
     setCardMode("create");
@@ -627,16 +69,6 @@ export default function Kanban() {
     setCardMode("memberCreate");
   }
 
-  // When creating a form checking if the user has inputted text
-  const isFormValid = title.trim().length > 0 && description.trim().length > 0;
-  const isMemberFormValid = memberEmail.trim().length > 0;
-  const displayMembers: Member[] = projectOwner
-    ? [
-        projectOwner as Member,
-        ...members.filter((m) => m.user_id !== projectOwner.user_id),
-      ]
-    : members;
-
   return (
     <>
       <div className="home-container">
@@ -658,50 +90,12 @@ export default function Kanban() {
         </div>
       </div>
 
-      <DndContext
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-        sensors={sensors}
-      >
-        <div className="kanban-container">
-          <div className="kanban-board">
-            {columns.map((column) => (
-              <DroppableColumn key={column.id} column={column}>
-                <div className="column-header">
-                  <h2 className="column-title">{column.title}</h2>
-                  <span className="column-count">{column.count}</span>
-                </div>
-                <div className="column-content">
-                  <SortableContext
-                    items={column.tasks.map((t) => t.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {column.tasks.map((task) => (
-                      <SortableTask
-                        key={task.id}
-                        task={task}
-                        borderColor={column.borderColor}
-                      />
-                    ))}
-                  </SortableContext>
-                </div>
-              </DroppableColumn>
-            ))}
-          </div>
-        </div>
-
-        <DragOverlay>
-          {activeDragTask ? (
-            <TaskCard
-              task={activeDragTask}
-              borderColor={
-                columnConfig[activeDragTask.status]?.borderColor || "#CAD5E2"
-              }
-            />
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+      <KanbanBoard
+        columns={columns}
+        projectId={projectId!}
+        onTasksUpdate={refreshTasks}
+        onTaskClick={editCard}
+      />
 
       <div className="home-container">
         <div className="home-header">
@@ -740,7 +134,7 @@ export default function Kanban() {
                       className="bin-icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveMember(member.user_id);
+                        removeMember(member.user_id);
                       }}
                     />
                   )}
@@ -755,180 +149,58 @@ export default function Kanban() {
       </div>
 
       {(cardMode === "create" || cardMode === "edit") && (
-        <>
-          <div className="modal-overlay" onClick={closeCard}></div>
-          <Card className="create-task-card">
-            <CardHeader>
-              {cardMode === "create" && (
-                <>
-                  <CardTitle>Create New Task</CardTitle>
-                  <CardDescription>
-                    Add a new task to your project. Give it a name and
-                    description to get started.
-                  </CardDescription>
-                </>
-              )}
+        <TaskModal
+          mode={cardMode}
+          task={activeTask}
+          members={displayMembers}
+          title={title}
+          setTitle={setTitle}
+          description={description}
+          setDescription={setDescription}
+          status={status}
+          setStatus={setStatus}
+          assignee={assignee}
+          setAssignee={setAssignee}
+          onSave={() => {
+            if (cardMode === "edit" && activeTask) {
+              updateExistingTask({
+                activeTask,
+                title,
+                description,
+                status,
+                assignee,
+              });
+            } else {
+              createNewTask({
+                title,
+                description,
+              });
+            }
 
-              {cardMode === "edit" && activeTask && (
-                <>
-                  <CardTitle>Edit Task</CardTitle>
-                  <CardDescription>
-                    Update the task details below.
-                  </CardDescription>
-                </>
-              )}
-
-              <CardAction>
-                <button
-                  className="close-btn"
-                  onClick={closeCard}
-                  aria-label="Close modal"
-                >
-                  ×
-                </button>
-              </CardAction>
-            </CardHeader>
-
-            <CardContent>
-              <div className="form-group">
-                <label htmlFor="task-name">Task Name</label>
-                <input
-                  type="text"
-                  id="task-name"
-                  placeholder="Enter task name"
-                  className="form-input"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="task-description">Description</label>
-                <textarea
-                  id="task-description"
-                  placeholder="Enter task description"
-                  className="form-textarea"
-                  rows={4}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              {cardMode === "edit" && (
-                <div className="form-group">
-                  <label htmlFor="task-status">Status</label>
-                  <select
-                    id="task-status"
-                    className="form-status"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                  >
-                    <option value="To Do">To Do</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Done">Done</option>
-                  </select>
-
-                  <label htmlFor="task-assignment">Assign member to task</label>
-                  <select
-                    id="task-assignment"
-                    className="form-status"
-                    value={assignee}
-                    onChange={(e) => setAssignee(e.target.value)}
-                  >
-                    <option value="">Unassigned</option>
-
-                    {displayMembers.map((member) => (
-                      <option key={member.user_id} value={member.user_id}>
-                        {member.name}
-                        {currentUser?.id === member.user_id ? " (You)" : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </CardContent>
-
-            <CardFooter>
-              {cardMode === "edit" && activeTask && (
-                <button className="btn-delete" onClick={handleDeleteTask}>
-                  Delete task
-                </button>
-              )}
-
-              <div>
-                <button className="btn-cancel" onClick={closeCard}>
-                  Cancel
-                </button>
-                <button
-                  className="btn-create"
-                  disabled={!isFormValid}
-                  onClick={
-                    cardMode === "edit" ? handleUpdateTask : handleCreateTask
-                  }
-                >
-                  {isLoading
-                    ? "Saving..."
-                    : cardMode === "edit"
-                      ? "Update Task"
-                      : "Create Task"}
-                </button>
-              </div>
-            </CardFooter>
-          </Card>
-        </>
+            closeCard();
+          }}
+          onDelete={() => {
+            if (activeTask) {
+              deleteExistingTask(activeTask.id);
+              closeCard();
+            }
+          }}
+          onClose={closeCard}
+          isLoading={isLoading}
+        />
       )}
 
       {cardMode === "memberCreate" && (
-        <>
-          <div className="modal-overlay" onClick={closeCard}></div>
-          <Card className="create-task-card">
-            <CardHeader>
-              <CardTitle>Add new member</CardTitle>
-              <CardDescription>
-                Add a new member to your project. Enter their email and they
-                will be apart of this project
-              </CardDescription>
-
-              <CardAction>
-                <button
-                  className="close-btn"
-                  onClick={closeCard}
-                  aria-label="Close modal"
-                >
-                  ×
-                </button>
-              </CardAction>
-            </CardHeader>
-
-            <CardContent>
-              <div className="form-group">
-                <label htmlFor="task-name">Member email</label>
-                <input
-                  type="text"
-                  id="member-email"
-                  placeholder="Enter member email"
-                  className="form-input"
-                  value={memberEmail}
-                  onChange={(e) => setMemberEmail(e.target.value)}
-                />
-              </div>
-            </CardContent>
-
-            <CardFooter>
-              <div>
-                <button className="btn-cancel" onClick={closeCard}>
-                  Cancel
-                </button>
-                <button
-                  className="btn-create"
-                  disabled={!isMemberFormValid}
-                  onClick={handleAddMember}
-                >
-                  {isLoading ? "Saving..." : "Add member"}
-                </button>
-              </div>
-            </CardFooter>
-          </Card>
-        </>
+        <MemberModal
+          memberEmail={memberEmail}
+          setMemberEmail={setMemberEmail}
+          onSave={() => {
+            addNewMember(memberEmail);
+            closeCard();
+          }}
+          onClose={closeCard}
+          isLoading={isLoading}
+        />
       )}
     </>
   );

@@ -51,7 +51,7 @@ export async function removeUserFromProjectController(
   }
   try {
     const project_id = Number(req.params.id);
-    const user_id = req.user.id;
+    const user_id = req.body.user_id;
 
     if (!project_id) {
       res.status(400).json({ error: "Cannot find project" });

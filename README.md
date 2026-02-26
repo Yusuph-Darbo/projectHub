@@ -24,7 +24,7 @@
 
 - **Kanban Board**
   - Tasks categorized by “To Do”, “In Progress”, and “Done”
-  - Drag & drop (if implemented)
+  - Drag & drop
 
 ---
 
