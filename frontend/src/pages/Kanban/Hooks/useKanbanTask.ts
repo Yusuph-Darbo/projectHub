@@ -329,6 +329,7 @@ export default function useKanbanTasks(projectId: string) {
     columns,
     members,
     displayMembers,
+    projectOwner,
     isOwner,
     isLoading,
     createNewTask,

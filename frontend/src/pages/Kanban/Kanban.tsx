@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth.js";
 import type { EnrichedTask } from "../../types/task.js";
-import type { ProjectOwner } from "../../types/project.js";
 
 type CardMode = null | "create" | "edit" | "memberCreate";
 
@@ -19,7 +18,6 @@ export default function Kanban() {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [status, setStatus] = useState<string>("To Do");
-  const [projectOwner, setProjectOwner] = useState<ProjectOwner | null>(null);
   const [assignee, setAssignee] = useState<string>("");
   const [memberEmail, setMemberEmail] = useState<string>("");
 
@@ -30,6 +28,7 @@ export default function Kanban() {
     columns,
     members,
     displayMembers,
+    projectOwner,
     isOwner,
     isLoading,
     createNewTask,
